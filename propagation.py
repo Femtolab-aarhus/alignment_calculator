@@ -42,7 +42,7 @@ import tempfile
 import utils
 
 libpropagation = None;
-try: # to load the C library for fieldfree propagation.
+try: # to load the C library for propagation.
     if (utils.running_on_windows()):
         libpropagation = ctypes.CDLL("./libpropagation.dll");
     else:
