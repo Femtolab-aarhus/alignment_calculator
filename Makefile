@@ -44,6 +44,7 @@ U2d_win.o: U2d.c
 
 clean:
 	rm -f *.o libpropagation.so libU2d.so
+	(cd wigner && make clean)
 
 
 wigner/libwigner.a: $(wildcard wigner/*.f)
