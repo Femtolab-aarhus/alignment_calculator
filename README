@@ -16,15 +16,14 @@ GUI.py
 Graphical front-end for both cos2_thermal.py and cos2_calc.py.
 Requires PyQt5.
 
-precalculate_matrix_elements.py 
+precalculate_matrix_elements.py
 ===============================
 Script for calculating <J'KM| cos^2 theta_2d |JKM> matrix elements in advance.
 If you run this script, the matrix elements will not have to be calculated
 every time you calculate a 2d alignment trace.
 
-This saves some time if e.g. you calculate several similar alignment traces
+This saves some time e.g. if you calculate several similar alignment traces
 or you write something like an optimisation script up against this program.
-
 
 
 

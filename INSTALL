@@ -1,0 +1,27 @@
+The alignment calculator is written mostly in Python, and depends 
+on numpy, matplotlib, scipy and PyQt5.
+A python installation with these dependencies should be enough to get started.
+See README for an overview on how to use the program.
+
+
+Two helper libraries, written in C and FORTRAN, are available too.
+
+libpropagation is a library for quickly propagating the wave function
+and evaluating expectation values. With this library,
+alignment trace calculation is significantly faster than the with only 
+a Python installation.
+
+libU2d is a library for calculating 2d matrix elements. In order to calculate
+2d alignment traces, this library is required, unless precomputed matrix
+elements are available.
+
+To compile these libraries, just enter "make".
+You will need a C and FORTRAN compiler. The makefile is set up to
+use gcc and gfortran. As a recommended option, you should
+also have the GNU Scientific Library, GSL installed.
+This library is used to speed up calculation of 2d matrix elements.
+Without it, you must pass the -DNO_GSL switch to gcc and
+remove the -lgsl -lgslcblas flags.
+This is the default on Windows.
+
+

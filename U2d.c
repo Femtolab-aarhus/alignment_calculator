@@ -32,6 +32,11 @@
 #define max(a,b) (a > b) ? a : b
 #define min(a,b) (a < b) ? a : b
 
+// This library can be compiled without any GSL dependences.
+// If you do this, define NO_GSL. The expand_U2d function
+// for calculating expansion coefficients will not be exported
+// in this case.
+
 #ifndef NO_GSL
 #include <gsl/gsl_sf.h>
 #include <gsl/gsl_sf_legendre.h>
