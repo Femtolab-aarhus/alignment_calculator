@@ -1,3 +1,5 @@
+This alignment calculator has several entry points:
+
 cos2_thermal.py
 ===============
 Program for calculating alignment traces of a Boltzmann ensemble of symmetric tops in gas phase.
@@ -9,19 +11,20 @@ Program for calculating alignment traces of a single |JKM> state of a symmetric 
 Note: Check the molecular data in conf/molecules.conf before blindly using them.
 Always have a good source of information you can cite.
 
-
 GUI.py
 ======
 Graphical front-end for both cos2_thermal.py and cos2_calc.py.
 Requires PyQt5.
 
+precalculate_matrix_elements.py 
+===============================
+Script for calculating <J'KM| cos^2 theta_2d |JKM> matrix elements in advance.
+If you run this script, the matrix elements will not have to be calculated
+every time you calculate a 2d alignment trace.
 
-FOR CALCULATING cos^2 theta 2D
-==============================
-Some cos^2 theta 2d matrix elements have been pre-computed.
-If you want to use these, copy them into the precomputed_U2d_matrices folder. 
+This saves some time if e.g. you calculate several similar alignment traces
+or you write something like an optimisation script up against this program.
 
-To calculate them yourself, use the U2d.py program. Presently, you will need
-some knowledge of C to select which method to use when calculating the matrix elements.
+
 
 
