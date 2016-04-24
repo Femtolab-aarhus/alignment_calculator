@@ -33,6 +33,7 @@ import matplotlib.cm as mpl_cm
 import numpy
 from _gui import Ui_MainWindow
 from _about import Ui_Form as aboutForm
+from _precalculate import Ui_precalculate as precalculateForm
 import time
 import threading
 import configparser,config,boltzmann
@@ -40,6 +41,7 @@ import tempfile
 from tempfile import NamedTemporaryFile
 import utils
 import gc
+import U2dcalc
 
 
 #cmd = sys.executable;
@@ -66,6 +68,7 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
 
         self.ui.mybutn.clicked.connect(self.Go);
         self.ui.saveTrace.triggered.connect(self.saveTrace);
+        self.ui.actionPrecalculate.triggered.connect(self.precalculate);
         self.ui.actionClose_figures.triggered.connect(self.close_figs);
         self.ui.actionExit.triggered.connect(self.quit_program);
         self.ui.actionHelp.triggered.connect(self.help);
@@ -81,15 +84,8 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
         self.ui.abundanceOdd.textChanged.connect(self.update_num_states);
         self.ui.percentile.textChanged.connect(self.update_num_states);
 
-        if utils.running_on_windows():
-            self.ui.cos2d.stateChanged.connect(self.cos2dWarning);
-    
         self.show();
     
-    def cos2dWarning(self,checked):
-        QMessageBox.warning(self,'Unable to generate matrix elements',"On Windows, the function for calculating cos^2 theta 2d matrix elements has not been implemented.\n\nYou can still calculate 2d alignment traces if you have the required matrix elements available (__U2d_XXXX.npz files).\n\nRun this program on a Linux PC to generate the matrix element files. You can use these files on Windows, too.");
-        self.ui.cos2d.stateChanged.disconnect(self.cos2dWarning);
-
     def update_num_states(self,checked=0):
         A = default("0",self.ui.Aconst.text());
         B = self.ui.Bconst.text();
@@ -309,8 +305,6 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
                 self.validation_error("Invalid initial state tab");
     
             p["cos2d"] = cos2d;
-            if (cos2d and p["Aconst"] != 0):
-                self.validation_error("<cos^2 theta 2d> only implemented for linear molecules.");
 
             return p;
         except ValueError:
@@ -444,6 +438,10 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
     def about(self):
         #self.about_w = aboutWidget(self)
         q = aboutWidget(self)
+
+    def precalculate(self):
+        q = precalculateWidget(self)
+
     def help(self):
         helpmsg = "It may be helpful to hover the mouse cursor over\n";
         helpmsg += "items and text labels that you don't understand.";
@@ -462,6 +460,83 @@ class aboutWidget(PyQt5.QtWidgets.QDialog):
         self.ui.setupUi(self)
         self.ui.Ok.clicked.connect(self.close);
         self.show();
+
+class precalculateWidget(PyQt5.QtWidgets.QDialog):
+    def __init__(self,MainWindow):
+        super().__init__(MainWindow);
+        self.ui = precalculateForm();
+        self.ui.setupUi(self)
+
+        self.ui.cancelButton.clicked.connect(self.close);
+        self.ui.calculateButton.clicked.connect(self.calculate);
+        self.ui.deleteButton.clicked.connect(self.delete);
+
+        self.ui.Jmax.textChanged.connect(self.update_size_req);
+        self.ui.Kmax.textChanged.connect(self.update_size_req);
+        self.ui.Mmax.textChanged.connect(self.update_size_req);
+        
+        self.update_available();
+        self.show();
+
+    def update_available(self):
+        size = U2dcalc.cache_size();
+        if (size is None):
+            self.ui.deleteButton.setEnabled(False);
+            self.ui.availableLabel.setText("None.");
+        else:
+            Jmax,Kmax,Mmax = size;
+            self.ui.deleteButton.setEnabled(True);
+            self.ui.availableLabel.setText("Jmax = {}, Kmax = {}, Mmax = {}.".format(Jmax,Kmax,Mmax));
+
+
+    def calculate(self):
+        inputs = self.validate_input();
+        if (inputs is not False):
+            Jmax,Kmax,Mmax = inputs;
+            self.setEnabled(False);
+            self.update();
+            QMessageBox.information(self,'Responsiveness','This user interface will be irresponsive while the calculation is carried out.');
+            try:
+                U2dcalc.precalculate_matrix_elements(Jmax,Kmax,Mmax);
+                self.update_available();
+                QMessageBox.information(self,'Success!','Calculation done.');
+                self.close();
+            except BaseException as e:
+                QMessageBox.critical(self,'Failed to calculate matrix elements',str(e));
+                self.setEnabled(True);
+        else:
+            QMessageBox.critical(self,'Validation error',"Invalid input");
+
+    def delete(self):
+        U2dcalc.drop_cache();
+        self.update_available();
+
+    def validate_input(self):
+        inputs = [];
+        inputs.append(self.ui.Jmax.text());
+        inputs.append(self.ui.Kmax.text());
+        inputs.append(self.ui.Mmax.text());
+
+        try:
+            inputs = [int(i) if i != "" else 0 for i in inputs];
+            for i in inputs:
+                if (i < 0):
+                    return False;
+            return inputs;
+        except:
+            return False;
+    
+    def update_size_req(self):
+        inputs = self.validate_input();
+        if (inputs):
+            Jmax,Kmax,Mmax = inputs;
+            size = round(8*2*(Jmax+1)**2*(Kmax+1)*(Mmax+1)/1024**2);
+            self.ui.sizeLabel.setText(str(size));
+            self.ui.calculateButton.setEnabled(True);
+        else:
+            self.ui.calculateButton.setEnabled(False);
+
+
 
 
 class calculatron(QThread):

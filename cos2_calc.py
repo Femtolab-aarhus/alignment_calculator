@@ -69,9 +69,6 @@ if __name__ == "__main__":
 
     t_end = args.t[0]*1e-12;
     
-    if (calculate_cos2d and molecule.A != 0):
-        raise NotImplementedError("Calculation of cos^2 theta 2d for non-linear molecules not implemented.");
-
     if (J < 0):
         raise RuntimeError('J must be positive');
 

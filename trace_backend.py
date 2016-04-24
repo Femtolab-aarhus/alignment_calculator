@@ -28,6 +28,7 @@ import sys,os
 import config
 import utils
 import time
+import U2dcalc
 
 def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,do_psi_pulse=False):
     laserpulses.sort();
@@ -82,7 +83,7 @@ def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,do_psi_p
         U, U0, U1, U2 = interaction.MeanCos2Matrix(Jmax,K,M,KMsign)
         U = scipy.sparse.dia_matrix(U) # TODO: U is already sparse...
         if (do_cos2d):
-            U2d = interaction.MeanCos2dMatrix(Jmax,K,M,KMsign);
+            U2d = U2dcalc.MeanCos2dMatrix(Jmax,K,M,KMsign);
         for i in range(len(integration_time)):
             psi = transfer[i,:];
             cos2_pulse[i] = numpy.real(numpy.conj(psi).dot(U.dot(psi)))

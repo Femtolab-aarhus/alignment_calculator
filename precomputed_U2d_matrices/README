@@ -1,6 +1,0 @@
-These matrices can also be used in calculations performed in a smaller basis.
-interaction.py automatically adjusts the matrix size in those cases.
-
-Note: For M >= 7 the matrix elements here are neglected if they have a magnitude below 1e-3. This means you should expect an error on the order of Jmax*1e-3.
-
-

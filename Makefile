@@ -10,7 +10,7 @@ CFLAGS = $(WARNINGS) -Wall -mtune=native -march=native -pipe -fpic -Ofast -ffast
 LDFLAGS = -lm 
 
 
-all:	libpropagation.so U2d
+all:	libpropagation.so libU2d.so
 
 libpropagation.dll:	propagation_win.o
 	@echo 
@@ -19,12 +19,12 @@ libpropagation.dll:	propagation_win.o
 	$(WINCC) $(LDFLAGS) -shared -Wl,--subsystem,windows,--out-implib,libpropagation.dll,--add-stdcall-alias propagation_win.o -o libpropagation.dll
 
 
-
 libpropagation.so:	propagation.o
 	@echo 
 	@echo Making libpropagation.so
 	@echo 
 	$(CC) $(LDFLAGS) -shared -Wl,-soname,libpropagation.so.1 propagation.o -o libpropagation.so
+
 
 
 propagation.o: propagation.c
@@ -36,22 +36,30 @@ propagation.s: propagation.c
 propagation_win.o: propagation.c
 	$(WINCC) $(CFLAGS) -o propagation_win.o -c propagation.c
 
+U2d.o: U2d.c
+	$(CC) -c $(CFLAGS) -fopenmp -o U2d.o U2d.c
+U2d_win.o: U2d.c
+	$(WINCC) -c $(CFLAGS) -DNO_GSL -fopenmp -o U2d_win.o U2d.c
+
 
 clean:
-	rm -f propagation.o propagation_win.o libpropagation.so
+	rm -f *.o libpropagation.so libU2d.so
 
 
-U2d:	U2d.c
-	@echo 
-	@echo Making U2d program
-	@echo 
-	$(CC) U2d.c $(CFLAGS) -O3 -lm -lgsl -lgslcblas -fopenmp -o U2d
+wigner/libwigner.a: $(wildcard wigner/*.f)
+	(cd wigner && make)
 
-U2d.exe:	U2d.c
+libU2d.so:	U2d.o wigner/libwigner.a
 	@echo 
-	@echo Making U2d program
+	@echo Making U2d \(cos^2 theta 2d matrix\) library
 	@echo 
-	$(WINCC) U2d.c -DWINDOWS $(CFLAGS) -O3 -lm -lgsl -lgslcblas -fopenmp -o U2d.exe
+	$(CC) $(LDFLAGS) -shared -Wl,-soname,libU2d.so.1 U2d.o -lgfortranbegin -lgfortran -lwigner -L./wigner -lgsl -lgslcblas -fopenmp -o libU2d.so
+
+libU2d.dll:	U2d_win.o wigner/libwigner.a
+	@echo 
+	@echo Making U2d \(cos^2 theta 2d matrix\) library
+	@echo 
+	$(WINCC) $(LDFLAGS) -shared -Wl,--subsystem,windows,--out-implib,libU2d.dll,--add-stdcall-alias U2d_win.o -lwigner -lgfortran -lquadmath -L./wigner -fopenmp -o libU2d.dll
 
 
 

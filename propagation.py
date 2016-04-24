@@ -28,6 +28,7 @@ from scipy.integrate import ode
 from scipy import linalg
 from numpy import exp,log,sqrt,pi
 import interaction
+import U2dcalc
 import datetime
 import time
 import io
@@ -54,7 +55,7 @@ try: # to load the C library for propagation.
     libpropagation.propagate_field.restype = ct.c_int;
     libpropagation.propagate_field.argtypes = (ct.c_size_t, ct.c_size_t, ct.c_size_t, ct.c_double, ct.c_double, ct.c_double, ct.c_double, cplx_ndptr, real_ndptr, real_ndptr, cplx_ndptr, cplx_ndptr);
 except OSError: # Fall back to the python implementation
-    print("Not using the C library (compile it with make). Propagation will be slow.",file=sys.stderr);
+    print("Not using the C propagation library (compile it with make). Propagation will be slow.",file=sys.stderr);
 
 
 def transfer_JKM(J,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule):
@@ -138,12 +139,12 @@ def propagate(psi_0,time,E_rot,E_0_squared_max,sigma,eig,vec):
      if (numpy.any(numpy.abs(numpy.diff(numpy.diff(time)))>1e-20)):
          raise RuntimeError("Pulse time steps must be equidistant.");
 
-     # Within the minimum time step, a Gaussian is approximately constant.
-     dt_min = 2.4*sigma/150; 
+     # Within the maximum time step, a Gaussian is approximately constant.
+     dt_max = 2.4*sigma/150; 
      dt = time[1]-time[0];
      # If our given time step is larger than this, use a smaller time step
-     if (dt > dt_min):
-         scale = int(numpy.ceil(dt/dt_min));
+     if (dt > dt_max):
+         scale = int(numpy.ceil(dt/dt_max));
          dt = dt/scale;
      else:
          scale = 1;
@@ -163,7 +164,7 @@ def propagate(psi_0,time,E_rot,E_0_squared_max,sigma,eig,vec):
             psi_t[i,:] = expRot2*psi_t[i-1,:];
             for k in range(scale):
                 # I(t), gaussian beam
-                if (k > 0): # Double step:
+                if (k > 0): # Double half step:
                     psi_t[i,:] = expRot*psi_t[i,:];
                 tp = t+k*dt;
                 E_0_squared = E_0_squared_max * numpy.exp(-(tp**2)/(2*sigma**2)); 
@@ -181,7 +182,7 @@ def fieldfree_propagation(psi_0,t0,times,E_rot,Jmax,K,M,KMsign,do_cos2d=False):
      U, Udiag, U1, U2 = interaction.MeanCos2Matrix(Jmax,K,M,KMsign);
      cos2d = numpy.array([]);
      if (do_cos2d):
-        U2d = interaction.MeanCos2dMatrix(Jmax,K,M,KMsign);
+        U2d = U2dcalc.MeanCos2dMatrix(Jmax,K,M,KMsign);
      else:
         U2d = U;
     

@@ -76,10 +76,6 @@ if __name__ == "__main__":
 
     t_end = args.t[0]*1e-12;
 
-    if (calculate_cos2d and molecule.A != 0):
-        raise NotImplementedError("Calculation of cos^2 theta 2d for non-linear molecules not implemented.");
-
-
     states = boltzmann.thermal_JKM_ensemble(T,molecule,Jmax,percentile,anisotropy);
 
     t,cos2,cos2d,psi = dispatcher.dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_cos2d,do_psi_pulse=False)

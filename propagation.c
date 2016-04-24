@@ -22,6 +22,7 @@
 #include <complex.h>
 #include <stdbool.h>
 #include <string.h>
+#include <assert.h>
 
 #define M_PI 3.14159265358979323846
 
@@ -33,6 +34,8 @@
 static void fast2band(const size_t N, const double diag[N], const double band1[N-1], const double band2[N-2], double complex psi_out[N], const double complex psi[N]) {
 
      size_t i;
+
+     assert(N>3);
 
      psi_out[0] = diag[0]*psi[0] + band1[0]*psi[1] + band2[0]*psi[2];
 
@@ -116,17 +119,6 @@ static double norm(size_t N, const double complex a[N]) {
 }
 */
 
-
-
-
-// Using this function instead of the python one is only
-// 1.2-2 times faster. The hope was that the compiler
-// could make use of the vector processing capabilities
-// of modern processors. However, it turns out not to be
-// so simple in the case of the involved loops.
-//
-// On windows, it makes a huge difference to propagate in C code instead
-// of python/numpy. 
 
 void fieldfree_propagation(size_t Jmax, const double complex psi_0[Jmax+1], double t0, size_t num_times, const double times[num_times], const double E_rot[Jmax+1], const double Udiag[Jmax+1], const double Uband1[Jmax], const double Uband2[Jmax-1], double complex psi_result[num_times][Jmax+1], double cos2[num_times], _Bool do_cos2d, const double U2d[Jmax+1][Jmax+1], double cos2d[num_times]) {
 

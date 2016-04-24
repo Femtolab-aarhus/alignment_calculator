@@ -17,39 +17,24 @@
 #   You should have received a copy of the GNU General Public License
 #   along with Alignment calculator. If not, see <http://www.gnu.org/licenses/>.
 
-import interaction
 import argparse
-import numpy
+import U2dcalc
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Calculate cos^2 theta 2 matrix elements.');
+    parser = argparse.ArgumentParser(description='Precalculate cos^2 theta 2d matrix elements for quick lookup instead of online calculation.');
 
-    parser.add_argument('Jmax',type=int,help='J of highest basis vector.');
-    parser.add_argument('K',type=int,help='The K quantum number');
-    parser.add_argument('M',type=int,help='The M quantum number');
+    parser.add_argument('Jmax',type=int,help='Maximum J quantum number.');
+    parser.add_argument('Kmax',type=int,help='Maximum K quantum number.');
+    parser.add_argument('Mmax',type=int,help='Maximum M quantum number.');
+
 
     args = parser.parse_args();
 
     Jmax = args.Jmax;
-    K = int(args.K);
-    M = int(args.M);
+    Kmax = args.Kmax;
+    Mmax = args.Mmax;
 
-    if (Jmax < 0):
-        raise RuntimeError('J must be positive');
-
-   
-    KMsign = numpy.sign(K*M);
-    if (KMsign == 0):
-        KMsign = 1;
-
-    Kp = abs(K);
-    Mp = abs(M);
-
-    if (Kp != 0):
-        raise NotImplementedError("Calculation only implemented for linear molecules.");
-
-    interaction.PrepareMeanCos2dMatrix(Jmax,Kp,Mp,KMsign);
-
+    U2dcalc.precalculate_matrix_elements(Jmax,Kmax,Mmax);
 
 

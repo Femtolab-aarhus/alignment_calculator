@@ -23,288 +23,171 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <assert.h>
 
+#include <math.h>
+
+#define M_PI 3.14159265358979323846
+
+#define max(a,b) (a > b) ? a : b
+#define min(a,b) (a < b) ? a : b
+
+#ifndef NO_GSL
 #include <gsl/gsl_sf.h>
 #include <gsl/gsl_sf_legendre.h>
 #include <gsl/gsl_integration.h>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_monte.h>
-// protip: you can switch between vegas and miser just by search and replace
-// through the source file.
-#include <gsl/gsl_monte_vegas.h>
 
 
-//#define WINDOWS
-
-#ifndef WINDOWS
-#include <unistd.h>
-#include <sys/mman.h>
-#include <sys/file.h>
-#endif
-
-#define max(a,b) (a > b) ? a : b
-
-double integrand(double u, double phi, int l, int lp, int m) {
-     double Pl1, Pl2;
+static double integrand(double phi, double u) {
      const double usq = u*u;
      double sin2phi;
 
      if (u == 0) return 0;
 
-     Pl1 = gsl_sf_legendre_sphPlm(l, m, u);
-     if (l != lp) {
-          Pl2 = gsl_sf_legendre_sphPlm(lp,m,u);
-     } else {
-          Pl2 = Pl1;
-     }
-
      sin2phi = sin(phi);
      sin2phi = sin2phi*sin2phi;
-     return Pl1*Pl2*usq/(usq+(1-usq)*sin2phi);
+     return usq/(usq+(1-usq)*sin2phi);
 }
-
-struct integrand_monte_params {
-     int l, lp, m;
-};
-
-double integrand_monte_wrap(double *x, size_t dim, void *params) {
-     (void)(dim); // Avoid unused warning
-     struct integrand_monte_params *p = params;
-     return integrand(x[0],x[1],p->l,p->lp,p->m);
-
-}
-
-double vegas_integral(int l, int lp, int m, gsl_monte_vegas_state *vegas_state, gsl_rng *rng) {
-
-     double res, abserr;
-     //const double abstol = 1e-14, reltol = 1e-14; 
-     gsl_monte_function F;
-     double xl[2] = {-1, 0};
-     double xu[2] = { 1, 2*M_PI};
-     size_t calls;
-     
-     gsl_monte_vegas_init(vegas_state);
-     F.f = &integrand_monte_wrap;
-     struct integrand_monte_params params = {.l=l,.lp=lp,.m=m};
-     F.params = &params;
-     F.dim=2;
-
-     calls = 1000000;
-     gsl_monte_vegas_integrate(&F,xl,xu,2,10000,rng,vegas_state,&res,&abserr);
-     gsl_monte_vegas_integrate(&F,xl,xu,2,calls,rng,vegas_state,&res,&abserr);
-     printf("%e\n",abserr);
-
-     return res;
-
-}
-
 
 struct integrand_params {
-     double phi;
-     int l, lp, m;
+     double u;
 };
 
 
-double integrand_wrap(double u, void *params) {
+static double integrand_wrap(double psi, void *params) {
      struct integrand_params *p = params;
-     return integrand(u,p->phi,p->l,p->lp,p->m);
+     return integrand(psi,p->u);
 }
 
 struct inner_params {
      gsl_function integrand;
      gsl_integration_workspace *workspace;
+     int l;
      size_t limit;
 };
 
-double inner(double phi, void *params) {
+static double inner(double u, void *params) {
   
      struct inner_params *p = params;
      struct integrand_params *ip = p->integrand.params;
-     const double abstol = 1e-14, reltol = 1e-14; 
+     const double abstol = 1e-13, reltol = 1e-13; 
      double result,abserr;
 
-     ip->phi = phi;
-     gsl_integration_qag(&(p->integrand),-1.0,1.0,abstol,reltol,p->limit,GSL_INTEG_GAUSS61,p->workspace,&result,&abserr);
-     return result;
+     ip->u = u;
+     gsl_integration_qag(&(p->integrand),0.0,2*M_PI,abstol,reltol,p->limit,GSL_INTEG_GAUSS61,p->workspace,&result,&abserr);
+
+     return result*gsl_sf_legendre_sphPlm(p->l, 0, u);
 }
 
-double outer(int l, int lp, int m, gsl_integration_workspace *ws_in, gsl_integration_workspace *ws_out, size_t limit) {
+static double outer(int l, gsl_integration_workspace *ws_in, gsl_integration_workspace *ws_out, size_t limit) {
 
      double res, abserr;
-     const double abstol = 1e-14, reltol = 1e-14; 
+     const double abstol = 1e-13, reltol = 1e-13; 
      gsl_function inner_F, F;
      
      inner_F.function = &integrand_wrap;
-     struct integrand_params inner_params = {.phi=0,.l=l,.lp=lp,.m=m};
+     struct integrand_params inner_params = {.u=0};
      inner_F.params = &inner_params;
 
      F.function = &inner;
-     struct inner_params params = {.integrand=inner_F,.workspace=ws_in,.limit=limit};
+     struct inner_params params = {.integrand=inner_F,.workspace=ws_in,.l=l,.limit=limit};
      F.params = &params;
 
-     gsl_integration_qag(&F, 0, 2*M_PI, abstol, reltol, limit, GSL_INTEG_GAUSS61, ws_out, &res, &abserr);
+     gsl_integration_qag(&F, -1.0, 1.0, abstol, reltol, limit, GSL_INTEG_GAUSS61, ws_out, &res, &abserr);
 
      return res;
 
 }
 
-void populate_U2d(int lmax, int lmin, int m, double U2d[lmax+1][lmax+1]) {
+// Calculate relevant expansion coefficients by numerical integration
+void expand_U2d(int lmax, double coeff[lmax+1]) {
 
-     int l,lp;
      const size_t limit = 409600;
+     int l;
+     
+     memset(coeff,0,((size_t)lmax+1)*sizeof(double));
      gsl_integration_workspace *inner_workspace,*workspace;
 
-     #pragma omp parallel default(shared) private(l,lp,inner_workspace,workspace)
+     printf("Expanding cos^2 theta 2d in Legendre polynomials...\n");
+
+     #pragma omp parallel default(shared) private(l,inner_workspace,workspace)
      {
      inner_workspace = gsl_integration_workspace_alloc(limit);
      workspace = gsl_integration_workspace_alloc(limit);
      #pragma omp for schedule(guided,4)
-     for (l = m; l <= lmax; l++) {
-     for (lp = max(l,lmin); lp <= lmax; lp+=2) {
-
-     U2d[l][lp] = outer(l,lp,m,inner_workspace,workspace,limit);
-     U2d[lp][l] = U2d[l][lp];
-
+     for (l=0; l<=lmax; l+=2) {
+          coeff[l] = outer(l,inner_workspace,workspace,limit);
+          //printf("%i: %e\n",l,coeff[l]);
+          printf("l = %i, ",l);
+          fflush(stdout);
      }
-     }
-
      gsl_integration_workspace_free(workspace);
      gsl_integration_workspace_free(inner_workspace);
      }
+     printf("\n");
+
 }
 
+// Export Wigner 3j symbol (using GSL)
+double three(int j1, int j2, int j3, int m1, int m2, int m3) {
+     return gsl_sf_coupling_3j(2*j1,2*j2,2*j3,2*m1,2*m2,2*m3);
+}
+// Same but with m=0
+double three0(int j1, int j2, int j3) {
+     // Apparently we loose some speed here. There is a faster
+     // way to calculate (j1,j2,j3,0,0,0) than gsl does.
+     return three(j1,j2,j3,0,0,0);
+}
 
-void populate_U2d_vegas(int lmax, int lmin, int m, double U2d[lmax+1][lmax+1]) {
+#endif 
 
-     int l,lp;
-     gsl_monte_vegas_state *vegas_state;
-     gsl_rng *rng;
-     unsigned long int seed;
-     FILE *urnd = fopen("/dev/urandom","r");
 
-     #pragma omp parallel default(shared) private(l,lp,vegas_state,rng,seed)
+// Prototype for the drc3jj netlib function.
+int drc3jj(int l2, int l3, int m2, int m3, int *l1min, int *l1max, double *thrcof, int ndim);
+
+
+
+
+// Calculate the matrix elements. Coeff are the expansion coefficients.
+void populate_U2d(int lmax, int k, int m, int lppmax, double coeff[lppmax+1], double U2d[lmax+1][lmax+1]) {
+
+     int l,lp,lpp;
+     double w3jk[2*lmax+1];
+     double w3jm[2*lmax+1];
+     double fac;
+     int lppmin, lppmax_;
+
+     memset(U2d,0,sizeof(double)*((size_t)lmax+1)*((size_t)lmax+1));
+
+     #pragma omp parallel default(shared) private(l,lp,lpp,fac,w3jk,w3jm,lppmin,lppmax_)
      {
-     vegas_state = gsl_monte_vegas_alloc(2);
-     //rng = gsl_rng_alloc(gsl_rng_mt19937);
-     rng = gsl_rng_alloc(gsl_rng_taus);
-     fread(&seed,sizeof(seed),1,urnd);
-     gsl_rng_set(rng,seed);
      #pragma omp for schedule(guided,4)
-     for (l = m; l <= lmax; l++) {
-     for (lp = max(l,lmin); lp <= lmax; lp+=2) {
-
-     U2d[l][lp] = vegas_integral(l,lp,m,vegas_state,rng);
-     U2d[lp][l] = U2d[l][lp];
-
-     }
-     }
-
-     gsl_monte_vegas_free(vegas_state);
-     gsl_rng_free(rng);
-     }
-
-     fclose(urnd);
-}
-
-
-
-struct shm_state {
-     void *p;
-     size_t size;
-#ifdef WINDOWS
-     FILE *f;
-#endif
-};
-
-#ifndef WINDOWS
-void *shm_allocate(struct shm_state *state, const char *filename, size_t size) {
-
-     const int prot = PROT_READ|PROT_WRITE;
-     const int flags = MAP_SHARED;
-     int fd;
-
-     state->size = size;
-     fd = open(filename,O_CREAT|O_RDWR,00660); 
-     ftruncate(fd,(off_t) size);
-     state->p = mmap(NULL,size,prot,flags,fd,0);
-     close(fd);
-     return state->p;
-}
-
-void shm_deallocate(struct shm_state *state) {
-     munmap(state->p,state->size);
-}
-#else
-void *shm_allocate(struct shm_state *state, const char *filename, size_t size) {
-     state->size = size;
-     state->f = fopen(filename,"wb"); 
-     state->p = malloc(size);
-     return state->p;
-}
-
-void shm_deallocate(struct shm_state *state) {
-     fwrite(state->p,1,state->size,state->f);
-     fclose(state->f);
-     free(state->p);
-}
-#endif
-
-int main(int argc, char **argv) {
-
-     int lmax, lmin, k, m, kmsign;
-     size_t U2dsize;
-     char *filename;
-     struct shm_state mmap_state;
-
-     if (argc != 6 && argc != 7) {
-          fprintf(stderr,"\n");
-          fprintf(stderr,"Usage: %s filename lmax k m kmsign [lmin]\n", argv[0]);
-          fprintf(stderr,"\n");
-          fprintf(stderr,"Calculate <l'km| cos^2theta 2d |lkm> matrix elements.\n");
-          fprintf(stderr,"Both k and m must be nonnegative.\n");
-          fprintf(stderr,"If both k and m are nonzero, kmsign is the sign of k*m. Otherwise it is 1.\n");
-          fprintf(stderr,"Result stored in the file by name filename.\n");
-          fprintf(stderr,"\n");
-          exit(1);
-     }
+     for (l = max(abs(m),abs(k)); l <= lmax; l++) {
+     for (lp = l; lp <= lmax; lp+=2) {
      
-     filename = argv[1];
-     lmax = atoi(argv[2]);
-     k = atoi(argv[3]);
-     m = atoi(argv[4]);
-     kmsign = atoi(argv[5]);
-     if (argc == 7) {
-          lmin = atoi(argv[6]);
-     } else {
-          lmin = 0;
+     // Evaluate all 3j symbols in one go using recursion formula
+     assert(drc3jj(l,lp,k,-k,&lppmin,&lppmax_,w3jk,2*lmax+1)==0);
+     assert(lppmin==abs(l-lp));
+     assert(lppmax_==l+lp);
+     assert(drc3jj(l,lp,m,-m,&lppmin,&lppmax_,w3jm,2*lmax+1)==0);
+     assert(lppmin==abs(l-lp));
+     assert(lppmax_==l+lp);
+
+     lppmax_ = min(lppmax_,lppmax);
+          
+     U2d[l][lp] = 0;
+     for (lpp = abs(l-lp); lpp <= lppmax_; lpp++) {
+          fac = sqrt(2.0*lpp+1);
+          U2d[l][lp] += coeff[lpp]*fac*w3jk[lpp-abs(l-lp)]*w3jm[lpp-abs(l-lp)];
      }
 
+     U2d[l][lp] *= sqrt((2.0*((double) l)+1)*(2.0*((double) lp)+1)/(4*M_PI));
+     if ((m-k)&1) U2d[l][lp] = -U2d[l][lp]; // odd m-k: add phase factor.
 
-     if (k != 0) {
-          // This requires the evaluation of a tripple integral
-          // over all 3 Euler angles
-          fprintf(stderr,"k != 0 not implemented.\n");
-          exit(1);
+     U2d[lp][l] = U2d[l][lp];
      }
-     if ((kmsign != 1 && kmsign != -1) || (k*m == 0 && kmsign != 1) ) {
-          fprintf(stderr, "Invalid KMsign. Must be -1 or 1.\n");
-          exit(1);
+     }
      }
 
-     U2dsize = (size_t) ((lmax+1)*(lmax+1));
-     U2dsize *= sizeof(double);
-
-     double (*U2d)[lmax+1][lmax+1];
-
-     U2d = shm_allocate(&mmap_state,filename,U2dsize);
-
-     memset(U2d,0,U2dsize);
- 
-     //populate_U2d(lmax, lmin, m, *U2d);
-     populate_U2d_vegas(lmax, lmin, m, *U2d);
-
-     shm_deallocate(&mmap_state);
-
-
-     return 0;
 }
+

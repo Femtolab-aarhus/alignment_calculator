@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>517</width>
-    <height>594</height>
+    <height>579</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -22,7 +22,7 @@
   <property name="minimumSize">
    <size>
     <width>517</width>
-    <height>594</height>
+    <height>579</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -38,9 +38,9 @@
    <widget class="QPushButton" name="mybutn">
     <property name="geometry">
      <rect>
-      <x>390</x>
-      <y>514</y>
-      <width>83</width>
+      <x>372</x>
+      <y>500</y>
+      <width>91</width>
       <height>24</height>
      </rect>
     </property>
@@ -1374,7 +1374,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>460</y>
+      <y>470</y>
       <width>21</width>
       <height>19</height>
      </rect>
@@ -1390,22 +1390,6 @@
     </property>
     <property name="tristate">
      <bool>false</bool>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_5">
-    <property name="geometry">
-     <rect>
-      <x>28</x>
-      <y>482</y>
-      <width>291</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The matrix elements can take a while to compute.&lt;/p&gt;&lt;p&gt;Precomputed matrix elements might be available, though.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-    </property>
-    <property name="text">
-     <string>Note:   May be really slow.</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_37">
@@ -1568,30 +1552,11 @@
      <string>Basis size</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_59">
+   <widget class="QLabel" name="cos2dlabel">
     <property name="geometry">
      <rect>
       <x>28</x>
-      <y>500</y>
-      <width>351</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Unless the required matrix elements are available.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-    </property>
-    <property name="statusTip">
-     <string/>
-    </property>
-    <property name="text">
-     <string>Note2: May require the U2d helper program</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_28">
-    <property name="geometry">
-     <rect>
-      <x>28</x>
-      <y>460</y>
+      <y>470</y>
       <width>391</width>
       <height>19</height>
      </rect>
@@ -1603,10 +1568,26 @@
      <string>For direct comparison with experiments</string>
     </property>
     <property name="text">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Also calculate &amp;lt;cos&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt; θ&lt;span style=&quot; vertical-align:sub;&quot;&gt;2d&lt;/span&gt;&amp;gt; (linear molecules only).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Also calculate &amp;lt;cos&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt; θ&lt;span style=&quot; vertical-align:sub;&quot;&gt;2d&lt;/span&gt;&amp;gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="textFormat">
      <enum>Qt::RichText</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>29</x>
+      <y>491</y>
+      <width>340</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If you don't, the matrix elements will be re-computed every time you calculate a trace.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tip: In the file menu, you can calculate&lt;br/&gt;&amp;lt;J'KM|cos&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;θ&lt;span style=&quot; vertical-align:sub;&quot;&gt;2D&lt;/span&gt;|JKM&amp;gt; matrix elements in&lt;br/&gt;advance for faster calculations.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
   </widget>
@@ -1624,6 +1605,7 @@
      <string>File</string>
     </property>
     <addaction name="saveTrace"/>
+    <addaction name="actionPrecalculate"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -1669,6 +1651,11 @@
   <action name="actionHelp">
    <property name="text">
     <string>Help</string>
+   </property>
+  </action>
+  <action name="actionPrecalculate">
+   <property name="text">
+    <string>Precalculate 2d matrix elements</string>
    </property>
   </action>
  </widget>

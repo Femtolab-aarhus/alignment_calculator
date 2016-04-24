@@ -21,26 +21,10 @@ import time
 import datetime
 import trace_backend
 import multiprocessing
-import interaction
 import sys
 
 
 def dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_cos2d,do_psi_pulse=False):
-
-
-    # The MeanCos2dMatrix routine does not actually calculate
-    # any matrix elements. It just loads them from a file.
-    # Make sure these files exist. We do it here because
-    # the matrix element calculator itself is multithreaded,
-    # so we don't want each thread to start its own thread pool.
-    # Alternatively, we could use locking, but this is hard to do
-    # in a portable and simple manner.
-    if (calculate_cos2d):
-        for state in reversed(states):
-            K = state[2];
-            M = state[3];
-            KMsign = state[4];
-            interaction.PrepareMeanCos2dMatrix(Jmax,K,M,KMsign);
 
     if (t_end < 0):
         B = molecule.B;
