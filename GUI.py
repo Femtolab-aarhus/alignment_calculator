@@ -41,6 +41,11 @@ import tempfile
 from tempfile import NamedTemporaryFile
 import utils
 import gc
+
+if ("OMP_NUM_THREADS" not in os.environ.keys()):
+    import multiprocessing
+    # Tell U2dcalc to not limit the number of threads to use.
+    os.environ["OMP_NUM_THREADS"] = str(multiprocessing.cpu_count());
 import U2dcalc
 
 

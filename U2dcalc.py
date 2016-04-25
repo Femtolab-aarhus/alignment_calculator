@@ -30,6 +30,10 @@ from itertools import product
 matrix_element_file = "./precomputed_matrix_elements.npy";
 U2dlib = None;
 try:
+    # Disable multithreading in U2dlib. We are allready parallelized.
+    if ("OMP_NUM_THREADS" not in os.environ.keys()):
+        os.environ["OMP_NUM_THREADS"] = "1";
+
     if (utils.running_on_windows()):
         U2dlib = ctypes.CDLL("./libU2d.dll");
     else:
@@ -45,8 +49,6 @@ try:
     U2dlib.populate_U2d.restype = None;
     U2dlib.populate_U2d.argtypes = (ct.c_int,ct.c_int,ct.c_int,ct.c_int,real_ndptr,real_ndptr);
     
-    # Disable multithreading in U2dlib. We are allready parallelized.
-    os.environ["OMP_NUM_THREADS"] = "1";
 
 except OSError:
     print("Not using C matrix element library. Compile it with make.",file=sys.stderr);
@@ -200,13 +202,6 @@ def expansion_coefficients_in_python(lmax,a):
     print("Done expanding cos^2 theta 2d.",file=sys.stderr);
 
 def precalculate_matrix_elements(Jmax,Kmax,Mmax):
-
-    #  We are most likely not parallelized if we run this function.
-    #  Use the parallelized functions in U2dlib.
-    try:
-        del os.environ["OMP_NUM_THREADS"];
-    except KeyError:
-        pass;
 
     a = numpy.zeros((2,Kmax+1,Mmax+1,Jmax+1,Jmax+1));
 
