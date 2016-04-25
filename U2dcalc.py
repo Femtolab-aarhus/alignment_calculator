@@ -122,9 +122,6 @@ def filesystem_cache_lookup(Jmax,K,M,KMsign):
         KMsign *=-1;
         return numpy.ascontiguousarray(cache_file[KMsign,K,M,0:(Jmax+1),0:(Jmax+1)]);
     else:
-        print(M,K,Jmax);
-        print(cMmax,cKmax,cJmax)
-
         return None
 
 def cache_size():
@@ -158,9 +155,9 @@ def actually_calculate_U2d(Jmax,K,M,KMsign):
     try:
         expansion_coefficients = actually_calculate_U2d.expansion_coefficients;
     except AttributeError:
-        # Expand cos^2 theta in legendre polynomials P_l(u)
+        # Expand cos^2 theta 2d in legendre polynomials P_l(u)
         # for l = 0,1,2,...,lmax
-        lmax = min(100,2*Jmax);
+        lmax = 100; # min(100,2*Jmax); logic error if first call jmax=2, second jmax=200
         expansion_coefficients = numpy.empty(lmax+1);
         try:
             U2dlib.expand_U2d(lmax,expansion_coefficients);
@@ -180,7 +177,7 @@ def expansion_coefficients_in_python(lmax,a):
     # Calculate cos^2 theta 2d expansion coefficients in python instead
     # of using the C library.
     
-    print("C call not available. Calculating expansion coefficients in Python instead.\nThis can take a while...",file=sys.stderr);
+    print("C call not available. Calculating expansion coefficients in Python instead.\nThis is slow and can take a while...",file=sys.stderr);
 
     tol = 1e-13;
 
@@ -212,13 +209,12 @@ def precalculate_matrix_elements(Jmax,Kmax,Mmax):
     for (KMsign,K,M) in product(KMsigns,Ks,Ms):
         if (KMsign == -1 and (K == 0 or M == 0)):
             continue;
-        U2d = MeanCos2dMatrix(Jmax,K,M,KMsign);
         sign_idx = KMsign;
         if (sign_idx==1):
             sign_idx = 0;
         else:
             sign_idx=1;
-        a[sign_idx,K,M,:,:] = U2d[:,:];
+        a[sign_idx,K,M,:,:] = MeanCos2dMatrix(Jmax,K,M,KMsign)[:,:];
 
     print("Saving matrix elements to: ",matrix_element_file);
     numpy.save(matrix_element_file,a);

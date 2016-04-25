@@ -35,7 +35,6 @@ from _gui import Ui_MainWindow
 from _about import Ui_Form as aboutForm
 from _precalculate import Ui_precalculate as precalculateForm
 import time
-import threading
 import configparser,config,boltzmann
 import tempfile
 from tempfile import NamedTemporaryFile
@@ -44,8 +43,9 @@ import gc
 
 if ("OMP_NUM_THREADS" not in os.environ.keys()):
     import multiprocessing
-    # Tell U2dcalc to not limit the number of threads to use.
+    # Tell U2dcalc not to limit the number of threads to use.
     os.environ["OMP_NUM_THREADS"] = str(multiprocessing.cpu_count());
+
 import U2dcalc
 
 
