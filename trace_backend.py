@@ -58,9 +58,12 @@ def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,do_psi_p
         FWHM = pulse.FWHM;
         I_max = pulse.I_max;
 
-        times_before = numpy.arange(last_t,t-window*FWHM,dt);
-        if (len(times_before) < 2):
+        if (last_t > t-window*FWHM):
             raise RuntimeError("Pulses are not well enough separated.");
+
+        num_steps = max(2,numpy.ceil((t-window*FWHM-last_t)/dt))
+        times_before = numpy.linspace(last_t,t-window*FWHM,num_steps);
+        # Propagate between pulses
         psi_before,cos2_before,cos2d_before = propagation.fieldfree_propagation(psi,last_t,times_before,E_rot,Jmax,K,M,KMsign,do_cos2d);
 
         num_steps = max(2,numpy.ceil(2*window*FWHM/dt));
@@ -73,9 +76,9 @@ def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,do_psi_p
         if (numpy.abs(1-S) > 0.001):
             raise RuntimeError("Norm not preserved! "+ str((J,K,M,S)));
 
-        times.append(times_before);
-        cos2.append(cos2_before);
-        cos2d.append(cos2d_before);
+        times.append(times_before[1:-1]);
+        cos2.append(cos2_before[1:-1]);
+        cos2d.append(cos2d_before[1:-1]);
 
         times.append(integration_time+t)
         cos2_pulse = numpy.empty((len(integration_time),))
@@ -103,10 +106,10 @@ def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,do_psi_p
         
     times_after = numpy.arange(last_t,last_t+t_end,dt);
     psi_after,cos2_after,cos2d_after = propagation.fieldfree_propagation(psi,last_t,times_after,E_rot,Jmax,K,M,KMsign,do_cos2d);
-    times.append(times_after);
-    cos2.append(cos2_after);
+    times.append(times_after[1:]);
+    cos2.append(cos2_after[1:]);
     if (do_cos2d):
-        cos2d.append(cos2d_after);
+        cos2d.append(cos2d_after[1:]);
 
     times = numpy.concatenate(times);
     cos2 = numpy.concatenate(cos2);
