@@ -21,11 +21,18 @@ import time
 import datetime
 import trace_backend
 import multiprocessing
-import sys
+import sys,os
 
 
 def dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_cos2d,do_psi_pulse=False):
 
+    # We want to control all multi processing, since we are highest up.
+    # We also don't want more processes than cores, and we don't want to
+    # do threading and inter-process communcation inside tight loops.
+    os.environ["OMP_NUM_THREADS"] = "1";
+    os.environ["OPENBLAS_NUM_THREADS"]= "1";
+    os.environ["MKL_NUM_THREADS"] = "1";
+        
     if (t_end < 0):
         B = molecule.B;
         revival = 1/(2*B/(2*pi));

@@ -46,6 +46,8 @@ try:
     U2dlib.populate_U2d.argtypes = (ct.c_int,ct.c_int,ct.c_int,ct.c_int,real_ndptr,real_ndptr);
     
     # Disable multithreading in U2dlib. We are allready parallelized.
+    # OMP_NUM_THREADS in os.environ is not passed on to the C runtime lib.
+    # in some versions of Windows. 
     try: 
         U2dlib.omp_set_num_threads(1); # May fail if library compiled witout omp
     except:

@@ -515,7 +515,7 @@ class precalculateWidget(PyQt5.QtWidgets.QDialog):
             Jmax,Kmax,Mmax = inputs;
             self.setEnabled(False);
             self.update();
-            QMessageBox.information(self,'Responsiveness','This user interface will be irresponsive while the calculation is carried out.');
+            QMessageBox.information(self,'Responsiveness','This user interface will be irresponsive while the calculation is carried out.\n\nSorry about that!');
             try:
                 U2dcalc.set_num_threads(multiprocessing.cpu_count());
                 U2dcalc.precalculate_matrix_elements(Jmax,Kmax,Mmax);
