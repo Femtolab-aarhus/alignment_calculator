@@ -59,9 +59,9 @@ if __name__ == "__main__":
     K = int(args.K);
     M = int(args.M);
     Jmax = args.Jmax[0];
-    if (dt <= 0):
-        dt = utils.nice_time_step(molecule.B/(2*numpy.pi),Jmax)
     calculate_cos2d = args.cos2d;
+    if (dt <= 0):
+        dt = utils.nice_time_step(molecule.B/(2*numpy.pi),Jmax,for_cos2d=calculate_cos2d)
     store_csv = args.csv;
     out_filename = args.filename[0];
 

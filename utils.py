@@ -43,14 +43,18 @@ def save_to_csv(filename,t,cos2,cos2d,extra_headers=[],extra_columns=[],delimite
 def running_on_windows():
     return platform.system().lower().startswith('win');
 
-def nice_time_step(B,Jmax):
+def nice_time_step(B,Jmax,for_cos2d=False):
     ''' Chooses a nice time step based on the molecule and basis size '''
     # The highest frequency is the beat between
     # J = 0 and J = Jmax. However, this is never realized because
-    # of the Delta J = 2 selection rule for the pulse.
-    # The highest frequency components of any observable
+    # of the Delta J = 2 selection rule for the observable.
+    # The highest frequency components of cos^2 theta 2d
     # is therefore the frequency of the beat between Jmax and Jmax-2
     # 
+    # For cos^2 theta_2d, there are nonzero components out to at least J=100.
+    # So the rule here is beats between J and J±100 at least.
+    # However, these are very small and J±4 should suffice.
+    #
     # Although K>0 shifts the energy, the pulse does not change K,
     # so this offset is the same for all states.
     # Therefore, this calculation does not depend on A.
@@ -58,8 +62,13 @@ def nice_time_step(B,Jmax):
     samples_per_period = 10; # 2 for Nyquist criterion
     # Note: B given in Hz. The oscillation frequency
     # is simply the energy.
+    
+
     E_max = B*Jmax*(Jmax+1);
-    E_second = B*(Jmax-2)*(Jmax-1);
+    if (not for_cos2d):
+        E_second = B*(Jmax-2)*(Jmax-1);
+    else:
+        E_second = B*(Jmax-4)*(Jmax-3);
     
     frequency = E_max-E_second;
     sampling_frequency = frequency*samples_per_period;
