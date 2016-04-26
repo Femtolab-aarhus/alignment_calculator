@@ -60,7 +60,7 @@ libU2d.dll:	U2d_win.o wigner/libwigner.a
 	@echo 
 	@echo Making U2d \(cos^2 theta 2d matrix\) library
 	@echo 
-	$(WINCC) $(LDFLAGS) -shared -Wl,--subsystem,windows,--out-implib,libU2d.dll,--add-stdcall-alias U2d_win.o -lwigner -lgfortran -lquadmath -L./wigner -fopenmp -o libU2d.dll
+	$(WINCC) $(LDFLAGS) -shared -Wl,--subsystem,windows,--out-implib,libU2d.dll,--add-stdcall-alias U2d_win.o -lwigner -lgfortran -lquadmath -L./wigner -fopenmp -o libU2d.dll -static
 
 
 
