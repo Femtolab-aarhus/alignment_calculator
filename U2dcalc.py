@@ -33,6 +33,10 @@ try:
     # Disable multithreading in U2dlib. We are allready parallelized.
     if ("OMP_NUM_THREADS" not in os.environ.keys()):
         os.environ["OMP_NUM_THREADS"] = "1";
+        try:
+            U2dlib.omp_set_num_threads(1);
+        except:
+            pass;
 
     if (utils.running_on_windows()):
         U2dlib = ctypes.CDLL("./libU2d.dll");

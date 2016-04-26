@@ -18,7 +18,11 @@
 #   along with Alignment calculator. If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
+import multiprocessing
+# Tell U2dcalc not to limit the number of threads to use
+os.environ["OMP_NUM_THREADS"] = str(multiprocessing.cpu_count());
 import U2dcalc
+
 
 if __name__ == "__main__":
 
