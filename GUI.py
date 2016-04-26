@@ -89,6 +89,8 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
         self.ui.abundanceOdd.textChanged.connect(self.update_num_states);
         self.ui.percentile.textChanged.connect(self.update_num_states);
 
+        self.ensemble = [];
+
         self.show();
     
     def update_num_states(self,checked=0):
@@ -114,12 +116,15 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
             m.odd = odd;
             if (T >= 0 and even >= 0 and odd >= 0 and even+odd != 0 and percentile > 0 and percentile < 1):
                 ensemble = boltzmann.thermal_JKM_ensemble(T,m,Jmax,percentile);
+                self.ensemble = ensemble;
                 num = len(ensemble);
                 self.ui.num_ensemble_states.setText(str(num));
             else:
                 self.ui.num_ensemble_states.setText("N/A");
+                self.ensemble = [];
         except Exception as e:
             self.ui.num_ensemble_states.setText("N/A");
+            self.ensemble = [];
 
 
 
@@ -445,7 +450,17 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
         q = aboutWidget(self)
 
     def precalculate(self):
-        q = precalculateWidget(self)
+        ensemble = self.ensemble;
+        Jmax = self.ui.Jmax.text();
+        try:
+            Jmax = max(0,int(Jmax));
+        except:
+            Jmax = 140;
+
+        Kmax = max([0] + [m[2] for m in ensemble]);
+        Mmax = max([0] + [m[3] for m in ensemble]);
+            
+        q = precalculateWidget(self,Jmax,Kmax,Mmax)
 
     def help(self):
         helpmsg = "It may be helpful to hover the mouse cursor over\n";
@@ -467,7 +482,7 @@ class aboutWidget(PyQt5.QtWidgets.QDialog):
         self.show();
 
 class precalculateWidget(PyQt5.QtWidgets.QDialog):
-    def __init__(self,MainWindow):
+    def __init__(self,MainWindow,Jmax,Kmax,Mmax):
         super().__init__(MainWindow);
         self.ui = precalculateForm();
         self.ui.setupUi(self)
@@ -476,10 +491,15 @@ class precalculateWidget(PyQt5.QtWidgets.QDialog):
         self.ui.calculateButton.clicked.connect(self.calculate);
         self.ui.deleteButton.clicked.connect(self.delete);
 
+        self.ui.Jmax.setText(str(Jmax));
+        self.ui.Kmax.setText(str(Kmax));
+        self.ui.Mmax.setText(str(Mmax));
+
         self.ui.Jmax.textChanged.connect(self.update_size_req);
         self.ui.Kmax.textChanged.connect(self.update_size_req);
         self.ui.Mmax.textChanged.connect(self.update_size_req);
         
+        self.update_size_req();
         self.update_available();
         self.show();
 
