@@ -30,14 +30,6 @@ from itertools import product
 matrix_element_file = "./precomputed_matrix_elements.npy";
 U2dlib = None;
 try:
-    # Disable multithreading in U2dlib. We are allready parallelized.
-    if ("OMP_NUM_THREADS" not in os.environ.keys()):
-        os.environ["OMP_NUM_THREADS"] = "1";
-        try:
-            U2dlib.omp_set_num_threads(1);
-        except:
-            pass;
-
     if (utils.running_on_windows()):
         U2dlib = ctypes.CDLL("./libU2d.dll");
     else:
@@ -53,11 +45,21 @@ try:
     U2dlib.populate_U2d.restype = None;
     U2dlib.populate_U2d.argtypes = (ct.c_int,ct.c_int,ct.c_int,ct.c_int,real_ndptr,real_ndptr);
     
+    # Disable multithreading in U2dlib. We are allready parallelized.
+    try: 
+        U2dlib.omp_set_num_threads(1); # May fail if library compiled witout omp
+    except:
+        pass;
 
 except OSError:
     print("Not using C matrix element library. Compile it with make.",file=sys.stderr);
 
-
+def set_num_threads(num):
+    try:
+        if (num>0):
+            U2dlib.omp_set_num_threads(num);
+    except:
+        pass;
 
 def MeanCos2dMatrix(Jmax,K,M,KMsign):
     ''' Calculate <JKM|cos^2(theta 2d)|J'KM>. '''

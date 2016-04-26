@@ -40,12 +40,7 @@ import tempfile
 from tempfile import NamedTemporaryFile
 import utils
 import gc
-
-if ("OMP_NUM_THREADS" not in os.environ.keys()):
-    import multiprocessing
-    # Tell U2dcalc not to limit the number of threads to use.
-    os.environ["OMP_NUM_THREADS"] = str(multiprocessing.cpu_count());
-
+import multiprocessing
 import U2dcalc
 
 
@@ -522,6 +517,7 @@ class precalculateWidget(PyQt5.QtWidgets.QDialog):
             self.update();
             QMessageBox.information(self,'Responsiveness','This user interface will be irresponsive while the calculation is carried out.');
             try:
+                U2dcalc.set_num_threads(multiprocessing.cpu_count());
                 U2dcalc.precalculate_matrix_elements(Jmax,Kmax,Mmax);
                 self.update_available();
                 QMessageBox.information(self,'Success!','Calculation done.');
