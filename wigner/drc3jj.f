@@ -275,9 +275,10 @@ C  so that the recursion series THRCOF(1), ... , THRCOF(LSTEP)
 C  has to be rescaled to prevent overflow
 C
 C     LSCALE = LSCALE + 1
-      DO 70 I=1,LSTEP
-      IF(ABS(THRCOF(I)).LT.SRTINYsqrt)   THRCOF(I) = ZERO
-   70 THRCOF(I) = THRCOF(I) / SRHUGEsqrt
+      DO I=1,LSTEP
+       IF(ABS(THRCOF(I)).LT.SRTINYsqrt)   THRCOF(I) = ZERO
+       THRCOF(I) = THRCOF(I) / SRHUGEsqrt
+      end do
       SUM1 = SUM1 / HUGEsqrt
       SUMFOR = SUMFOR / HUGEsqrt
       X = X / SRHUGEsqrt
@@ -361,10 +362,11 @@ C  so that the recursion series THRCOF(NFIN), ... ,THRCOF(NFIN-LSTEP+1)
 C  has to be rescaled to prevent overflow
 C
 C     LSCALE = LSCALE + 1
-      DO 130 I=1,LSTEP
+      DO I=1,LSTEP
       INDEX = NFIN - I + 1
       IF(ABS(THRCOF(INDEX)).LT.SRTINYsqrt)   THRCOF(INDEX) = ZERO
-  130 THRCOF(INDEX) = THRCOF(INDEX) / SRHUGEsqrt
+      THRCOF(INDEX) = THRCOF(INDEX) / SRHUGEsqrt
+      end do
       SUM2 = SUM2 / HUGEsqrt
       SUMBAC = SUMBAC / HUGEsqrt
 C
@@ -388,15 +390,17 @@ C
 C
       IF(ABS(RATIO).LT.ONE)   GO TO 211
 C
-      DO 210 N=1,NLIM
-  210 THRCOF(N) = RATIO * THRCOF(N)
+      DO N=1,NLIM
+          THRCOF(N) = RATIO * THRCOF(N)
+      end do    
       SUMUNI = RATIO * RATIO * SUMFOR + SUMBAC
       GO TO 230
 C
   211 NLIM = NLIM + 1
       RATIO = ONE / RATIO
-      DO 212 N=NLIM,NFIN
-  212 THRCOF(N) = RATIO * THRCOF(N)
+      DO N=NLIM,NFIN
+      THRCOF(N) = RATIO * THRCOF(N)
+      end do
       SUMUNI = SUMFOR + RATIO*RATIO*SUMBAC
       GO TO 230
 C
@@ -416,14 +420,16 @@ C
 C
   236 IF(ABS(CNORM).LT.ONE)   GO TO 250
 C
-      DO 240 N=1,NFIN
-  240 THRCOF(N) = CNORM * THRCOF(N)
+      DO N=1,NFIN
+       THRCOF(N) = CNORM * THRCOF(N)
+      end do
       RETURN
 C
   250 THRESH = TINYsqrt / ABS(CNORM)
-      DO 251 N=1,NFIN
-      IF(ABS(THRCOF(N)).LT.THRESH)   THRCOF(N) = ZERO
-  251 THRCOF(N) = CNORM * THRCOF(N)
+      DO N=1,NFIN
+       IF(ABS(THRCOF(N)).LT.THRESH)   THRCOF(N) = ZERO
+       THRCOF(N) = CNORM * THRCOF(N)
+      end do
 C
       RETURN
       END

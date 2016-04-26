@@ -185,9 +185,9 @@ C           XERCTL to XERCNT.  (RWC)
 C   920501  Reformatted the REFERENCES section.  (WRB)
 C***END PROLOGUE  XERMSG
       CHARACTER*(*) LIBRAR, SUBROU, MESSG
-      CHARACTER*8 XLIBR, XSUBR
-      CHARACTER*72  TEMP
-      CHARACTER*20  LFIRST
+      CHARACTER(8) XLIBR, XSUBR
+      CHARACTER(72)  TEMP
+      CHARACTER(20)  LFIRST
 C***FIRST EXECUTABLE STATEMENT  XERMSG
       LKNTRL = J4SAVE (2, 0, .FALSE.)
       MAXMES = J4SAVE (4, 0, .FALSE.)
@@ -206,7 +206,8 @@ C
      *      'XERMSG -- INVALID ERROR NUMBER OR LEVEL$$ '//
      *      'JOB ABORT DUE TO FATAL ERROR.', 72)
          CALL XERSVE (' ', ' ', ' ', 0, 0, 0, KDUMMY)
-         CALL XERHLT (' ***XERMSG -- INVALID INPUT')
+         print *, ' ***XERMSG -- INVALID INPUT'
+         stop
          RETURN
       ENDIF
 C
@@ -226,7 +227,6 @@ C
       LFIRST = MESSG
       LERR   = NERR
       LLEVEL = LEVEL
-      CALL XERCNT (XLIBR, XSUBR, LFIRST, LERR, LLEVEL, LKNTRL)
 C
       LKNTRL = MAX(-2, MIN(2,LKNTRL))
       MKNTRL = ABS(LKNTRL)
@@ -356,9 +356,9 @@ C
             CALL XERPRN(' ***', -1, 'JOB ABORT DUE TO FATAL ERROR.', 72)
          ENDIF
          CALL XERSVE (' ', ' ', ' ', -1, 0, 0, KDUMMY)
-         CALL XERHLT (' ')
+         STOP
       ELSE
-         CALL XERHLT (MESSG)
+         STOP
       ENDIF
       RETURN
       END
