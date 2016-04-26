@@ -25,14 +25,7 @@ import sys,os
 
 
 def dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_cos2d,do_psi_pulse=False):
-
-    # We want to control all multi processing, since we are highest up.
-    # We also don't want more processes than cores, and we don't want to
-    # do threading and inter-process communcation inside tight loops.
-    os.environ["OMP_NUM_THREADS"] = "1";
-    os.environ["OPENBLAS_NUM_THREADS"]= "1";
-    os.environ["MKL_NUM_THREADS"] = "1";
-        
+       
     if (t_end < 0):
         B = molecule.B;
         revival = 1/(2*B/(2*pi));
@@ -44,6 +37,14 @@ def dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_
 
     focalvolume_weight,focal_pulses = trace_backend.focal_volume_average(pulses,Nshells,probe_waist);
 
+    # We want to control all multi processing, since we are furthest away from
+    # tight loops. We don't want more processes than cores, and we don't want to
+    # do threading and inter-process communcation inside tight loops.
+    # That would also hurt CPU caching in several ways.
+    os.environ["OMP_NUM_THREADS"] = "1";
+    os.environ["OPENBLAS_NUM_THREADS"]= "1";
+    os.environ["MKL_NUM_THREADS"] = "1";
+ 
     dispatcher_started_time = time.time();
     with multiprocessing.Pool() as p:
 
