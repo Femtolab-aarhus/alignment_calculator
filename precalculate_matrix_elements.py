@@ -19,8 +19,6 @@
 
 import argparse
 import multiprocessing
-# Tell U2dcalc not to limit the number of threads to use
-os.environ["OMP_NUM_THREADS"] = str(multiprocessing.cpu_count());
 import U2dcalc
 
 
@@ -39,6 +37,8 @@ if __name__ == "__main__":
     Kmax = args.Kmax;
     Mmax = args.Mmax;
 
+    # Tell U2dcalc not to limit the number of threads to use
+    U2dcalc.set_num_threads(multiprocessing.cpu_count());
     U2dcalc.precalculate_matrix_elements(Jmax,Kmax,Mmax);
 
 
