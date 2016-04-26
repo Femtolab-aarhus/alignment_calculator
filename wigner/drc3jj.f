@@ -156,13 +156,13 @@ C  Check error conditions 1 and 2.
          IER=1
          CALL XERMSG('SLATEC','DRC3JJ','L2-ABS(M2) or L3-ABS(M3) '//
      +      'less than zero.',IER,1)
-         RETURN
+         stop
       ELSEIF((MOD(L2+ABS(M2)+EPS,ONE).GE.EPS+EPS).OR.
      +   (MOD(L3+ABS(M3)+EPS,ONE).GE.EPS+EPS))THEN
          IER=2
          CALL XERMSG('SLATEC','DRC3JJ','L2+ABS(M2) or L3+ABS(M3) '//
      +      'not integer.',IER,1)
-         RETURN
+         stop
       ENDIF
 C
 C
@@ -176,43 +176,44 @@ C  Check error condition 3.
       IF(MOD(L1MAX-L1MIN+EPS,ONE).GE.EPS+EPS)THEN
          IER=3
          CALL XERMSG('SLATEC','DRC3JJ','L1MAX-L1MIN not integer.',IER,1)
-         RETURN
+         stop
       ENDIF
       IF(L1MIN.LT.L1MAX-EPS)   GO TO 20
-      IF(L1MIN.LT.L1MAX+EPS)   GO TO 10
-C
-C  Check error condition 4.
-      IER=4
-      CALL XERMSG('SLATEC','DRC3JJ','L1MIN greater than L1MAX.',IER,1)
-      RETURN
-C
+
+      IF(L1MIN.LT.L1MAX+EPS) then
 C  This is reached in case that L1 can take only one value,
 C  i.e. L1MIN = L1MAX
-C
-   10 CONTINUE
 C     LSCALE = 0
       THRCOF(1) = (-ONE) ** INT(ABS(L2+M2-L3+M3)+EPS) /
      1 SQRT(L1MIN + L2 + L3 + ONE)
       RETURN
+C         
+      end if
 C
+C  Check error condition 4.
+      IER=4
+      CALL XERMSG('SLATEC','DRC3JJ','L1MIN greater than L1MAX.',IER,1)
+      stop
+C
+
 C  This is reached in case that L1 takes more than one value,
 C  i.e. L1MIN < L1MAX.
 C
    20 CONTINUE
 C     LSCALE = 0
       NFIN = INT(L1MAX-L1MIN+ONE+EPS)
-      IF(NDIM-NFIN)  21, 23, 23
-C
+      IF (NDIM < NFIN) then 
 C  Check error condition 5.
-   21 IER = 5
+      IER = 5
       CALL XERMSG('SLATEC','DRC3JJ','Dimension of result array for '//
      +            '3j coefficients too small.',IER,1)
-      RETURN
+      stop
+      end if
 C
 C
 C  Starting forward recursion from L1MIN taking NSTEP1 steps
 C
-   23 L1 = L1MIN
+      L1 = L1MIN
       NEWFAC = 0.0D0
       C1 = 0.0D0
       THRCOF(1) = SRTINYsqrt
@@ -228,24 +229,22 @@ C
       A1 = (L1+L2+L3+ONE) * (L1-L2+L3) * (L1+L2-L3) * (-L1+L2+L3+ONE)
       A2 = (L1+M1) * (L1-M1)
       NEWFAC = SQRT(A1*A2)
-      IF(L1.LT.ONE+EPS)   GO TO 40
+      IF(L1.LT.ONE+EPS)  then
+C  If L1 = 1, (L1-1) has to be factored out of DV, hence
 C
+      C1 = - (L1+L1-ONE) * L1 * (M3-M2) / NEWFAC
+      else 
 C
       DV = - L2*(L2+ONE) * M1 + L3*(L3+ONE) * M1 + L1*(L1-ONE) * (M3-M2)
       DENOM = (L1-ONE) * NEWFAC
 C
-      IF(LSTEP-2)  32, 32, 31
+      IF(LSTEP-2 > 0) then
+          C1OLD = ABS(C1)
+      end if 
+      C1 = - (L1+L1-ONE) * DV / DENOM
+      end if 
 C
-   31 C1OLD = ABS(C1)
-   32 C1 = - (L1+L1-ONE) * DV / DENOM
-      GO TO 50
-C
-C  If L1 = 1, (L1-1) has to be factored out of DV, hence
-C
-   40 C1 = - (L1+L1-ONE) * L1 * (M3-M2) / NEWFAC
-C
-   50 IF(LSTEP.GT.2)   GO TO 60
-C
+      IF(LSTEP.LE.2) then
 C
 C  If L1 = L1MIN + 1, the third term in the recursion equation vanishes,
 C  hence
@@ -254,9 +253,11 @@ C  hence
       SUM1 = SUM1 + TINYsqrt * (L1+L1+ONE) * C1*C1
       IF(LSTEP.EQ.NFIN)   GO TO 220
       GO TO 30
+
+      end if 
 C
 C
-   60 C2 = - L1 * OLDFAC / DENOM
+      C2 = - L1 * OLDFAC / DENOM
 C
 C  Recursion to the next 3j coefficient X
 C
@@ -415,10 +416,11 @@ C  Sign convention for last 3j coefficient determines overall phase
 C
       SIGN1 = SIGN(ONE,THRCOF(NFIN))
       SIGN2 = (-ONE) ** INT(ABS(L2+M2-L3+M3)+EPS)
-      IF(SIGN1*SIGN2) 235,235,236
-  235 CNORM = - CNORM
+      IF(SIGN1*SIGN2 < 0) then
+      CNORM = - CNORM
+      end if 
 C
-  236 IF(ABS(CNORM).LT.ONE)   GO TO 250
+      IF(ABS(CNORM).LT.ONE)   GO TO 250
 C
       DO N=1,NFIN
        THRCOF(N) = CNORM * THRCOF(N)
