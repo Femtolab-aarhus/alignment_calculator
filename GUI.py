@@ -79,10 +79,14 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
         
         self.ui.Aconst.textChanged.connect(self.update_num_states);
         self.ui.Bconst.textChanged.connect(self.update_num_states);
+        self.ui.Bconst.textChanged.connect(self.update_timestep);
         self.ui.Temperature.textChanged.connect(self.update_num_states);
         self.ui.abundanceEven.textChanged.connect(self.update_num_states);
         self.ui.abundanceOdd.textChanged.connect(self.update_num_states);
         self.ui.percentile.textChanged.connect(self.update_num_states);
+        self.ui.forceDT.clicked.connect(self.force_timestep_click);
+        self.ui.Jmax.textChanged.connect(self.update_timestep);
+        self.ui.cos2d.clicked.connect(self.update_timestep);
 
         self.ensemble = [];
 
@@ -121,6 +125,25 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
             self.ui.num_ensemble_states.setText("N/A");
             self.ensemble = [];
 
+
+    def update_timestep(self,checked=False):
+        if (not self.ui.timestep.isEnabled()):
+            self.ui.timestep.setText("");
+            try:
+                cos2d = self.ui.cos2d.isChecked();
+                Jmax = max(2,int(default("140",self.ui.Jmax.text())));
+                B = float(self.ui.Bconst.text());
+                dt = 1000*utils.nice_time_step(B,Jmax,for_cos2d=cos2d);
+                if dt >= 0.01 and dt < 1000:
+                    self.ui.timestep.setText('%.3f' % dt);
+                else:
+                    self.ui.timestep.setText('%.2e' % dt);
+            except:
+                pass;
+
+
+    def force_timestep_click(self,checked):
+        self.ui.timestep.setEnabled(checked)
 
 
     def closeEvent(self, event):
@@ -310,6 +333,13 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
                 self.validation_error("Invalid initial state tab");
     
             p["cos2d"] = cos2d;
+    
+            if (self.ui.forceDT.isChecked()):
+                dt = default("0",self.ui.timestep.text());
+                dt = self.validator_to_float("Time step",dt);
+                p["dt"] = dt;
+
+
 
             return p;
         except ValueError:
@@ -644,6 +674,10 @@ class calculatron(QThread):
             resultfile_name = resultfile.name;
 
         args += ["--filename",resultfile_name]
+        try:
+            args += ["--dt", str(self.params["dt"])];
+        except:
+            pass;
         command = ' '.join(str(i) for i in args);
         print("Executing command:")
         print("");

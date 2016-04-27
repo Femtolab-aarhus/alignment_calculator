@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'GUI.ui'
 #
-# Created: Sun Apr 24 22:56:58 2016
+# Created: Wed Apr 27 09:29:26 2016
 #      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -430,6 +430,17 @@ class Ui_MainWindow(object):
         self.label_5 = QtWidgets.QLabel(self.centralwidget)
         self.label_5.setGeometry(QtCore.QRect(29, 491, 340, 51))
         self.label_5.setObjectName("label_5")
+        self.forceDT = QtWidgets.QCheckBox(self.centralwidget)
+        self.forceDT.setGeometry(QtCore.QRect(350, 420, 120, 19))
+        self.forceDT.setObjectName("forceDT")
+        self.timestep = QtWidgets.QLineEdit(self.centralwidget)
+        self.timestep.setEnabled(False)
+        self.timestep.setGeometry(QtCore.QRect(350, 440, 121, 20))
+        self.timestep.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.timestep.setObjectName("timestep")
+        self.label_28 = QtWidgets.QLabel(self.centralwidget)
+        self.label_28.setGeometry(QtCore.QRect(486, 440, 20, 20))
+        self.label_28.setObjectName("label_28")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 517, 19))
@@ -618,6 +629,10 @@ class Ui_MainWindow(object):
         self.cos2dlabel.setText(_translate("MainWindow", "<html><head/><body><p>Also calculate &lt;cos<span style=\" vertical-align:super;\">2</span> θ<span style=\" vertical-align:sub;\">2d</span>&gt;</p></body></html>"))
         self.label_5.setToolTip(_translate("MainWindow", "<html><head/><body><p>If you don\'t, the matrix elements will be re-computed every time you calculate a trace.</p></body></html>"))
         self.label_5.setText(_translate("MainWindow", "<html><head/><body><p>Tip: In the file menu, you can calculate<br/>&lt;J\'KM|cos<span style=\" vertical-align:super;\">2</span>θ<span style=\" vertical-align:sub;\">2D</span>|JKM&gt; matrix elements in<br/>advance for faster calculations.</p></body></html>"))
+        self.forceDT.setToolTip(_translate("MainWindow", "Sampling time step, not propagation time step."))
+        self.forceDT.setStatusTip(_translate("MainWindow", "For plotting only"))
+        self.forceDT.setText(_translate("MainWindow", "Force time step"))
+        self.label_28.setText(_translate("MainWindow", "ps"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuAbout.setTitle(_translate("MainWindow", "Help"))
         self.saveTrace.setText(_translate("MainWindow", "Save last trace data"))

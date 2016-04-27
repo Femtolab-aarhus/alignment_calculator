@@ -1590,6 +1590,54 @@
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tip: In the file menu, you can calculate&lt;br/&gt;&amp;lt;J'KM|cos&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;θ&lt;span style=&quot; vertical-align:sub;&quot;&gt;2D&lt;/span&gt;|JKM&amp;gt; matrix elements in&lt;br/&gt;advance for faster calculations.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
+   <widget class="QCheckBox" name="forceDT">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>420</y>
+      <width>120</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Sampling time step, not propagation time step.</string>
+    </property>
+    <property name="statusTip">
+     <string>For plotting only</string>
+    </property>
+    <property name="text">
+     <string>Force time step</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="timestep">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>440</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_28">
+    <property name="geometry">
+     <rect>
+      <x>486</x>
+      <y>440</y>
+      <width>20</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ps</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
