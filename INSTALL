@@ -5,6 +5,7 @@ See README for an overview on how to use the program.
 
 
 Two helper libraries, written in C and FORTRAN, are available too.
+One, libU2d, may be required for calculating 2d expectation values.
 
 libpropagation is a library for quickly propagating the wave function
 and evaluating expectation values. With this library,

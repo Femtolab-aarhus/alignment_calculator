@@ -26,4 +26,12 @@ This saves some time e.g. if you calculate several similar alignment traces
 or you write something like an optimisation script up against this program.
 
 
+Tips and tricks
+===============
+Source the env.sh script before running simulations.
+It can significantly speed things up.
+The alignment calculator tries to export these symbols by itself,
+but that strategy is not always perfect, as the exported symbols
+must in some cases be present on program startup.
+
 
