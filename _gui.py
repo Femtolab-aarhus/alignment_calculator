@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'GUI.ui'
 #
-# Created: Wed Apr 27 09:29:26 2016
+# Created: Wed Apr 27 09:42:42 2016
 #      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -629,7 +629,7 @@ class Ui_MainWindow(object):
         self.cos2dlabel.setText(_translate("MainWindow", "<html><head/><body><p>Also calculate &lt;cos<span style=\" vertical-align:super;\">2</span> θ<span style=\" vertical-align:sub;\">2d</span>&gt;</p></body></html>"))
         self.label_5.setToolTip(_translate("MainWindow", "<html><head/><body><p>If you don\'t, the matrix elements will be re-computed every time you calculate a trace.</p></body></html>"))
         self.label_5.setText(_translate("MainWindow", "<html><head/><body><p>Tip: In the file menu, you can calculate<br/>&lt;J\'KM|cos<span style=\" vertical-align:super;\">2</span>θ<span style=\" vertical-align:sub;\">2D</span>|JKM&gt; matrix elements in<br/>advance for faster calculations.</p></body></html>"))
-        self.forceDT.setToolTip(_translate("MainWindow", "Sampling time step, not propagation time step."))
+        self.forceDT.setToolTip(_translate("MainWindow", "<html><head/><body><p>Sampling time step, not propagation time step.</p><p>If you need to propagate to longer times, add a second, 0 intensity pulse at t = t0 + the extra time you need.</p></body></html>"))
         self.forceDT.setStatusTip(_translate("MainWindow", "For plotting only"))
         self.forceDT.setText(_translate("MainWindow", "Force time step"))
         self.label_28.setText(_translate("MainWindow", "ps"))

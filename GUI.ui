@@ -1600,7 +1600,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>Sampling time step, not propagation time step.</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sampling time step, not propagation time step.&lt;/p&gt;&lt;p&gt;If you need to propagate to longer times, add a second, 0 intensity pulse at t = t0 + the extra time you need.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="statusTip">
      <string>For plotting only</string>
