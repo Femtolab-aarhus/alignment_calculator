@@ -154,7 +154,7 @@ int drc3jj(int l2, int l3, int m2, int m3, int *l1min, int *l1max, double *thrco
 
 
 // Calculate the matrix elements. Coeff are the expansion coefficients.
-void populate_U2d(int lmax, int k, int m, int lppmax, double coeff[lppmax+1], double U2d[lmax+1][lmax+1]) {
+void populate_U2d(const int lmax, const int k, const int m, const int lppmax, double coeff[lppmax+1], double U2d[lmax+1][lmax+1]) {
 
      int l,lp,lpp;
      double w3jk[2*lmax+1];
@@ -168,7 +168,7 @@ void populate_U2d(int lmax, int k, int m, int lppmax, double coeff[lppmax+1], do
      {
      #pragma omp for schedule(guided,4)
      for (l = max(abs(m),abs(k)); l <= lmax; l++) {
-     for (lp = l; lp <= lmax; lp+=2) {
+     for (lp = l; lp <= lmax; lp += ((k==0 || m==0) ? 2 : 1)) {
      
      // Evaluate all 3j symbols in one go using recursion formula
      assert(drc3jj(l,lp,k,-k,&lppmin,&lppmax_,w3jk,2*lmax+1)==0);
