@@ -15,6 +15,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with Alignment calculator. If not, see <http://www.gnu.org/licenses/>.
 
+import kill_library_multithreading # must be done first
+
 import numpy 
 from numpy import pi
 import time
@@ -36,14 +38,6 @@ def dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_
     psis = [];
 
     focalvolume_weight,focal_pulses = trace_backend.focal_volume_average(pulses,Nshells,probe_waist);
-
-    # We want to control all multi processing, since we are furthest away from
-    # tight loops. We don't want more processes than cores, and we don't want to
-    # do threading and inter-process communcation inside tight loops.
-    # That would also hurt CPU caching in several ways.
-    os.environ["OMP_NUM_THREADS"] = "1";
-    os.environ["OPENBLAS_NUM_THREADS"]= "1";
-    os.environ["MKL_NUM_THREADS"] = "1";
  
     dispatcher_started_time = time.time();
     with multiprocessing.Pool() as p:

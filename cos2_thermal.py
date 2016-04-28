@@ -17,6 +17,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with Alignment calculator. If not, see <http://www.gnu.org/licenses/>.
 
+import kill_library_multithreading # must be done very first
+
 import sys,os
 import config
 import propagation
