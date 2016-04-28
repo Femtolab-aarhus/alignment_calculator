@@ -120,7 +120,8 @@ void expand_U2d(int lmax, double coeff[lmax+1]) {
      inner_workspace = gsl_integration_workspace_alloc(limit);
      workspace = gsl_integration_workspace_alloc(limit);
      #pragma omp for schedule(guided,4)
-     for (l=0; l<=lmax; l+=2) {
+     for (l=0; l<=lmax; l+=2) { // cos^2 theta 2d is even. Change to +=1 if 
+                                // you want to expand something else.
           coeff[l] = outer(l,inner_workspace,workspace,limit);
           //printf("%i: %e\n",l,coeff[l]);
           printf("l = %i, ",l);
@@ -168,6 +169,10 @@ void populate_U2d(const int lmax, const int k, const int m, const int lppmax, do
      {
      #pragma omp for schedule(guided,4)
      for (l = max(abs(m),abs(k)); l <= lmax; l++) {
+     // For k=0 or m=0, l+lp+lpp must be even.
+     // For cos^2 theta 2d lpp is always even.
+     // Change to lp ++ in this loop if you expand something else than
+     // cos^2 theta 2d:
      for (lp = l; lp <= lmax; lp += ((k==0 || m==0) ? 2 : 1)) {
      
      // Evaluate all 3j symbols in one go using recursion formula
