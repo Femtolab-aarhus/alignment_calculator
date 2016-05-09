@@ -54,11 +54,20 @@ try: # to load the C library for propagation.
     libpropagation.fieldfree_propagation.argtypes = (ct.c_int, cplx_ndptr, ct.c_double, ct.c_size_t, real_ndptr, real_ndptr, real_ndptr, real_ndptr, real_ndptr, cplx_ndptr, real_ndptr, ct.c_bool, real_ndptr, real_ndptr);
     libpropagation.propagate_field.restype = ct.c_int;
     libpropagation.propagate_field.argtypes = (ct.c_size_t, ct.c_size_t, ct.c_size_t, ct.c_double, ct.c_double, ct.c_double, ct.c_double, cplx_ndptr, real_ndptr, real_ndptr, cplx_ndptr, cplx_ndptr);
+    
+    # Don't use the ODE method if it is not available, i.e. if we compiled
+    # without GSL dependence.
+    try:
+        libpropagation.propagate_field_ODE.restype = ct.c_int;
+        libpropagation.propagate_field_ODE.argtypes = (ct.c_size_t, ct.c_size_t, ct.c_double, ct.c_double, ct.c_double, ct.c_double, cplx_ndptr, real_ndptr, real_ndptr, real_ndptr, real_ndptr);
+    except:
+        libpropagation.propagate_field_ODE = None;
+
 except OSError: # Fall back to the python implementation
     print("Not using the C propagation library (compile it with make). Propagation will be slow.",file=sys.stderr);
 
 
-def transfer_JKM(J,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule):
+def transfer_JKM(J,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=False):
      ''' Calculate the wave function after a laser pulse acting on a molecule
      in the state |JKM>.
 
@@ -75,10 +84,11 @@ def transfer_JKM(J,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule):
      psi = numpy.zeros(Jmax+1,dtype=numpy.complex);
      psi[J] = 1;
 
-     return transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule);
+     return transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE);
 
 
-def transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule):
+
+def transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=False):
      ''' Calculate the wave function after a laser pulse acting on a molecule
      in the state \sum_J C_J|KM>.
 
@@ -102,23 +112,34 @@ def transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule):
 
      sigma = FWHM/(2*sqrt(2*log(2)));
 
+     Js = numpy.arange(0,Jmax+1,1);
+     E_rot = B*Js*(Js+1) + (A-B)*K**2; # *hbar / hbar for solver
+
      # Note: since V and E_0_max ends up getting multiplied together,
      # 2 factors of epsilon_0 cancels
      # (since alpha is given in polarizability volume in Angstrom^3 =
      # 1/4pi epsilon_0 times polarizability )
      # Therefore, these factors are skipped.
-     V0, V1, V2, eig, vec = interaction.interaction_matrix_div_E0_squared(Jmax,K,M,KMsign,delta_alpha,alpha_perp);
+    
      E_0_squared_max = 2*peak_intensity/c;
-     
-     #V0 = V0*4*pi*1e-30/hbar; # Divide by hbar for solver
-     #V1 = V1*4*pi*1e-30/hbar;
-     #V2 = V2*4*pi*1e-30/hbar;
-     eig = eig*4*pi*1e-30/hbar;
 
-     Js = numpy.arange(0,Jmax+1,1);
-     E_rot = B*Js*(Js+1) + (A-B)*K**2; # *hbar / hbar for solver
-     
-     psi_t = propagate(psi,t,E_rot,E_0_squared_max,sigma,eig,vec);
+     if (libpropagation is not None):
+         if (libpropagation.propagate_field_ODE is None):
+             use_ODE = False;
+     else:
+         use_ODE = False;
+
+     if (not use_ODE or Jmax<=2):
+        V0, V1, V2, eig, vec = interaction.interaction_matrix_div_E0_squared(Jmax,K,M,KMsign,delta_alpha,alpha_perp,diagonalize=True);
+        # Divide by hbar for solver
+        eig = eig*4*pi*1e-30/hbar
+        psi_t = propagate(psi,t,E_rot,E_0_squared_max,sigma,eig,vec);
+     else:
+        V0, V1, V2, = interaction.interaction_matrix_div_E0_squared(Jmax,K,M,KMsign,delta_alpha,alpha_perp,diagonalize=False);
+        V0 = V0*4*pi*1e-30/hbar; # Divide by hbar for solver
+        V1 = V1*4*pi*1e-30/hbar;
+        V2 = V2*4*pi*1e-30/hbar;
+        psi_t = propagate_ODE(psi,t,E_rot,E_0_squared_max,sigma,V0,V1,V2);
 
      return psi_t;
 
@@ -173,6 +194,36 @@ def propagate(psi_0,time,E_rot,E_0_squared_max,sigma,eig,vec):
                     raise RuntimeError("Basis size too small");
             psi_t[i,:] = expRot2*psi_t[i,:];
             i = i + 1;
+ 
+     return psi_t;
+
+def propagate_ODE(psi_0,time,E_rot,E_0_squared_max,sigma,V0,V1,V2):
+     ''' Same as propagate, except it uses an ODE solver instead
+     of the matrix method.
+     
+     psi_0: initial wave function
+     time: array of timesteps to integrate. psi_0 is given at time[0].
+           The time step must be constant!
+     E_rot: array of rotational energies for each J.
+     E_0_squared_max: Max value of the square of the E field during pulse
+     sigma: temporal variance of the gaussian
+     V0,V1,V2: the three bands of the symmetric 5 diagonal interaction matrix,
+               V0 being the diagonal.
+     
+     '''
+     if (numpy.any(numpy.abs(numpy.diff(numpy.diff(time)))>1e-20)):
+         raise RuntimeError("Pulse time steps must be equidistant.");
+     dt = time[1]-time[0];
+
+     psi_t = numpy.empty((len(time),len(psi_0)), dtype=numpy.complex)
+     psi_t[0,:] = psi_0;
+     try:
+         res = libpropagation.propagate_field_ODE(len(time),len(psi_0),time[0],dt,E_0_squared_max,sigma,psi_t,V0,V1,V2,E_rot);
+     except:
+         raise
+         raise RuntimeError("For ODE propagation, you need the libpropagation C library, compiled with GSL support.");
+     if (res != 0):
+         raise RuntimeError("Basis size too small");
  
      return psi_t;
 

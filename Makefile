@@ -7,7 +7,7 @@ WINCC = x86_64-w64-mingw32-gcc
 WARNINGS = -std=c11 -pedantic -Wall -Wextra -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wnested-externs -D_POSIX_C_SOURCE=20160116
 
 CFLAGS = $(WARNINGS) -Wall -mtune=native -march=native -pipe -fpic -Ofast -ffast-math -fassociative-math -funroll-loops -fuse-linker-plugin -frename-registers -fweb -fomit-frame-pointer -funswitch-loops -funsafe-math-optimizations -fno-common
-LDFLAGS = -lm 
+LDFLAGS = -lm
 
 
 all:	libpropagation.so libU2d.so
@@ -23,7 +23,7 @@ libpropagation.so:	propagation.o
 	@echo 
 	@echo Making libpropagation.so
 	@echo 
-	$(CC) $(LDFLAGS) -shared -Wl,-soname,libpropagation.so.1 propagation.o -o libpropagation.so
+	$(CC) $(LDFLAGS) -shared -Wl,-soname,libpropagation.so.1 -lgslcblas -lgsl propagation.o -o libpropagation.so
 
 
 
@@ -34,7 +34,7 @@ propagation.s: propagation.c
 	$(CC) $(CFLAGS) -S -fverbose-asm -o propagation.s -c propagation.c
 
 propagation_win.o: propagation.c
-	$(WINCC) $(CFLAGS) -o propagation_win.o -c propagation.c
+	$(WINCC) -DNO_GSL $(CFLAGS) -o propagation_win.o -c propagation.c
 
 U2d.o: U2d.c
 	$(CC) -c $(CFLAGS) -fopenmp -o U2d.o U2d.c

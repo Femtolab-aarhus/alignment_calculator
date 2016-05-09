@@ -24,10 +24,16 @@
 #include <string.h>
 #include <assert.h>
 
+#ifndef NO_GSL
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_odeiv2.h>
+#endif
+
 #define M_PI 3.14159265358979323846
 
 #define min(x,y) x < y ? x : y
 #define max(x,y) x > y ? x : y
+
 
 // Fast matrix-vector multiplication when the matrix is symmetric 5-diagonal
 // Assumes the dimension is at least 4x4 !
@@ -210,6 +216,100 @@ int propagate_field(size_t Nsteps, size_t Nsteps_inner, size_t dim, double t, do
 
      return 0;
 }
+
+
+#ifndef NO_GSL
+struct deriv_params {
+     size_t jmax;
+     double peak_field_amplitude_squared, sigma;
+     const double *E_rot;
+     const double *V0, *V1, *V2;
+     int ncalls;
+};
+
+
+int deriv (double t, const double psi[], double dPsidt[], void * params) {
+     // Note: psi and dPsidt are complex, but GSL ode interface requires double.
+     // Index 2j is the j'th real component, and 2j+1 is the j'th imaginary
+     // component.
+ 
+     struct deriv_params *p = params;
+     size_t j;
+     const size_t jmax = p->jmax;
+     // Gaussian pulse:
+     double E_0_squared = p->peak_field_amplitude_squared * \
+                          exp(-t*t/(2*(p->sigma)*(p->sigma)));
+     double tmp;
+
+     
+     // Multiply the interaction term
+     fast2band(jmax+1,p->V0,p->V1,p->V2,(double complex *) dPsidt, (const double complex *) psi);
+     // Then add the diagonal and multiply every component with -i.
+     // I.e. -i*(a+ib) = b-ia.
+     for (j = 0; j < jmax; j++) {
+          dPsidt[2*j] *= E_0_squared;
+          dPsidt[2*j+1] *= E_0_squared;
+          dPsidt[2*j] += p->E_rot[j]*psi[2*j];
+          dPsidt[2*j+1] += p->E_rot[j]*psi[2*j+1];
+
+          // Multiplication by -i:
+          tmp = dPsidt[2*j+1]; // Imaginary part
+          dPsidt[2*j+1] = -dPsidt[2*j];
+          dPsidt[2*j]  = tmp; // becomes real part.
+     }
+
+     //p->ncalls++;
+
+     return GSL_SUCCESS;
+}
+
+
+int propagate_field_ODE(size_t Nsteps, const size_t dim, double t, double dt, double E0_sq_max, double sigma, double complex psi_t[Nsteps][dim], const double V0[], const double V1[], const double V2[], const double E_rot[]) {
+
+     size_t i;
+     struct deriv_params p = {dim-1,E0_sq_max,sigma,E_rot,V0,V1,V2,0};
+     gsl_odeiv2_system sys = {.function=deriv,.jacobian=NULL,\
+          .dimension=2*dim,.params=&p};
+
+     double initial_step_size = 2.4*sigma/150; // 150 steps per pulse
+     double abstol = 1e-8;
+     double reltol = 1e-8;
+     gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new (&sys, \
+               gsl_odeiv2_step_rk8pd, initial_step_size, abstol,reltol);
+               // rk8pd seems fastest. Did not try the methods
+               // that rely on the Jacobian. d(dpsi/dt)/dpsi is diagonal,
+               // but d(dpsi/dt)/dt is less trivial.
+               //gsl_odeiv2_step_rkck, initial_step_size, abstol,reltol);
+               //gsl_odeiv2_step_msadams, initial_step_size, abstol,reltol);
+               //gsl_odeiv2_step_rk2, initial_step_size, abstol,reltol);
+               //gsl_odeiv2_step_rkf45, initial_step_size, abstol,reltol);
+
+     double t_run = t;
+
+     for (i = 1; i < Nsteps; i++) {
+     
+          memcpy(psi_t[i],psi_t[i-1],sizeof(double complex)*dim);
+          gsl_odeiv2_driver_apply(d,&t_run,t+(double)i*dt,(double *) psi_t[i]);
+     
+          // In the truncated basis, the ODE equation interaction term
+          // never transfers population to the lase expansion coefficient.
+          // For K=0 (eg linear molecules) also it does not allow population
+          // of the last two levels. Therefore, we check the levels
+          // before that.
+          if (fmax(pow(cabs(psi_t[i][dim-4]),2),pow(cabs(psi_t[i][dim-3]),2)) > 1e-5)
+               return 1; // Basis size too small
+
+     }
+
+     gsl_odeiv2_driver_free(d);
+
+     //printf("ncalls: %i.\n",p.ncalls);
+
+     return 0;
+}
+
+#endif
+
 
 /* Experimentation with krylov subspace method. 
 // Note: Clutters psi
