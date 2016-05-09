@@ -43,6 +43,7 @@ import tempfile
 import utils
 
 libpropagation = None;
+can_propagate_using_ODE = False;
 try: # to load the C library for propagation.
     if (utils.running_on_windows()):
         libpropagation = ctypes.CDLL("./libpropagation.dll");
@@ -60,8 +61,9 @@ try: # to load the C library for propagation.
     try:
         libpropagation.propagate_field_ODE.restype = ct.c_int;
         libpropagation.propagate_field_ODE.argtypes = (ct.c_size_t, ct.c_size_t, ct.c_double, ct.c_double, ct.c_double, ct.c_double, cplx_ndptr, real_ndptr, real_ndptr, real_ndptr, real_ndptr);
+        can_propagate_using_ODE = True;
     except:
-        libpropagation.propagate_field_ODE = None;
+        pass;
 
 except OSError: # Fall back to the python implementation
     print("Not using the C propagation library (compile it with make). Propagation will be slow.",file=sys.stderr);
@@ -123,10 +125,7 @@ def transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=False
     
      E_0_squared_max = 2*peak_intensity/c;
 
-     if (libpropagation is not None):
-         if (libpropagation.propagate_field_ODE is None):
-             use_ODE = False;
-     else:
+     if (not can_propagate_using_ODE)
          use_ODE = False;
 
      if (not use_ODE or Jmax<=2):
