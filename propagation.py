@@ -125,7 +125,7 @@ def transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=False
     
      E_0_squared_max = 2*peak_intensity/c;
 
-     if (not can_propagate_using_ODE)
+     if (not can_propagate_using_ODE):
          use_ODE = False;
 
      if (not use_ODE or Jmax<=2):
