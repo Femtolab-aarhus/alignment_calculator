@@ -23,6 +23,9 @@ also have the GNU Scientific Library, GSL installed.
 This library is used to speed up calculation of 2d matrix elements.
 Without it, you must pass the -DNO_GSL switch to gcc and
 remove the -lgsl -lgslcblas flags.
-This is the default on Windows.
+
+
+A precompiled library has been supplied for the Windows version.
+The GSL source used for building the library can be found in the ext/ folder.
 
 

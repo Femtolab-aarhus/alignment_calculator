@@ -113,7 +113,8 @@ void expand_U2d(int lmax, double coeff[lmax+1]) {
      memset(coeff,0,((size_t)lmax+1)*sizeof(double));
      gsl_integration_workspace *inner_workspace,*workspace;
 
-     printf("Expanding cos^2 theta 2d in Legendre polynomials...\n");
+     //printf("Expanding cos^2 theta 2d in Legendre polynomials up to l=%i... ",lmax);
+     //fflush(stdout);
 
      #pragma omp parallel default(shared) private(l,inner_workspace,workspace)
      {
@@ -124,13 +125,13 @@ void expand_U2d(int lmax, double coeff[lmax+1]) {
                                 // you want to expand something else.
           coeff[l] = outer(l,inner_workspace,workspace,limit);
           //printf("%i: %e\n",l,coeff[l]);
-          printf("l = %i, ",l);
-          fflush(stdout);
+          //printf("l = %i, ",l);
+          //fflush(stdout);
      }
      gsl_integration_workspace_free(workspace);
      gsl_integration_workspace_free(inner_workspace);
      }
-     printf("\n");
+     //printf(" Done.\n");
 
 }
 

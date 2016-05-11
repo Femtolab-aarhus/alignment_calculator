@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'GUI.ui'
 #
-# Created: Wed Apr 27 09:42:42 2016
+# Created: Wed May 11 11:53:56 2016
 #      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -421,7 +421,7 @@ class Ui_MainWindow(object):
         self.label_58.setFont(font)
         self.label_58.setObjectName("label_58")
         self.label_54 = QtWidgets.QLabel(self.centralwidget)
-        self.label_54.setGeometry(QtCore.QRect(340, 280, 91, 16))
+        self.label_54.setGeometry(QtCore.QRect(340, 280, 171, 16))
         self.label_54.setObjectName("label_54")
         self.cos2dlabel = QtWidgets.QLabel(self.centralwidget)
         self.cos2dlabel.setGeometry(QtCore.QRect(28, 470, 391, 19))
@@ -490,7 +490,8 @@ class Ui_MainWindow(object):
         MainWindow.setTabOrder(self.pulseDuration, self.pumpWaist)
         MainWindow.setTabOrder(self.pumpWaist, self.probeWaist)
         MainWindow.setTabOrder(self.probeWaist, self.Nshells)
-        MainWindow.setTabOrder(self.Nshells, self.InitConditionsTab)
+        MainWindow.setTabOrder(self.Nshells, self.t0)
+        MainWindow.setTabOrder(self.t0, self.InitConditionsTab)
         MainWindow.setTabOrder(self.InitConditionsTab, self.Temperature)
         MainWindow.setTabOrder(self.Temperature, self.abundanceEven)
         MainWindow.setTabOrder(self.abundanceEven, self.abundanceOdd)
@@ -501,7 +502,9 @@ class Ui_MainWindow(object):
         MainWindow.setTabOrder(self.K, self.M)
         MainWindow.setTabOrder(self.M, self.Jmax)
         MainWindow.setTabOrder(self.Jmax, self.cos2d)
-        MainWindow.setTabOrder(self.cos2d, self.mybutn)
+        MainWindow.setTabOrder(self.cos2d, self.forceDT)
+        MainWindow.setTabOrder(self.forceDT, self.timestep)
+        MainWindow.setTabOrder(self.timestep, self.mybutn)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -605,9 +608,9 @@ class Ui_MainWindow(object):
         self.Nshells.setPlaceholderText(_translate("MainWindow", "1"))
         self.label_30.setToolTip(_translate("MainWindow", "Number of focal volume iso intensity shells to average traces over"))
         self.label_30.setText(_translate("MainWindow", "#FVA shells"))
-        self.t0.setToolTip(_translate("MainWindow", "Kick pulse time"))
+        self.t0.setToolTip(_translate("MainWindow", "<html><head/><body><p>Kick pulse time</p><p>Tip: If you need to propagate to longer times, add a second, 0 intensity pulse at t = t0 + the extra time you need.</p></body></html>"))
         self.t0.setPlaceholderText(_translate("MainWindow", "0"))
-        self.label_43.setToolTip(_translate("MainWindow", "Kick pulse time"))
+        self.label_43.setToolTip(_translate("MainWindow", "<html><head/><body><p>Kick pulse time</p><p>Tip: If you need to propagate to longer times, add a second, 0 intensity pulse at t = t0 + the extra time you need.</p></body></html>"))
         self.label_43.setText(_translate("MainWindow", "<html><head/><body><p>T<span style=\" vertical-align:sub;\">0</span></p></body></html>"))
         self.label_44.setText(_translate("MainWindow", "ps"))
         self.label_3.setText(_translate("MainWindow", "Laser pulse (Gaussian, linearly polarized)"))
@@ -617,6 +620,7 @@ class Ui_MainWindow(object):
         self.label_37.setToolTip(_translate("MainWindow", "<html><head/><body><p>For multiple pulses, separate each t0 and optionally peak intensity, FWHM, and pump waist with a comma. If a field other than t0 only contains one value, all kick pulses will use that value.</p><p>The pulses must not overlap each other.</p></body></html>"))
         self.label_37.setText(_translate("MainWindow", "For multiple pulses, separate t0 with comma"))
         self.label_39.setText(_translate("MainWindow", "Jmax ="))
+        self.Jmax.setToolTip(_translate("MainWindow", "Tip: for adiabatic alignment, Jmax can be really low."))
         self.Jmax.setPlaceholderText(_translate("MainWindow", "140"))
         self.label_55.setText(_translate("MainWindow", "of the highest basis"))
         self.label_56.setText(_translate("MainWindow", "state |JKM>."))
@@ -629,16 +633,22 @@ class Ui_MainWindow(object):
         self.cos2dlabel.setText(_translate("MainWindow", "<html><head/><body><p>Also calculate &lt;cos<span style=\" vertical-align:super;\">2</span> θ<span style=\" vertical-align:sub;\">2d</span>&gt;</p></body></html>"))
         self.label_5.setToolTip(_translate("MainWindow", "<html><head/><body><p>If you don\'t, the matrix elements will be re-computed every time you calculate a trace.</p></body></html>"))
         self.label_5.setText(_translate("MainWindow", "<html><head/><body><p>Tip: In the file menu, you can calculate<br/>&lt;J\'KM|cos<span style=\" vertical-align:super;\">2</span>θ<span style=\" vertical-align:sub;\">2D</span>|JKM&gt; matrix elements in<br/>advance for faster calculations.</p></body></html>"))
-        self.forceDT.setToolTip(_translate("MainWindow", "<html><head/><body><p>Sampling time step, not propagation time step.</p><p>If you need to propagate to longer times, add a second, 0 intensity pulse at t = t0 + the extra time you need.</p></body></html>"))
+        self.forceDT.setToolTip(_translate("MainWindow", "<html><head/><body><p>Sampling time step, not propagation time step. By default, this corresponds to 5 times the Nyquist sampling rate for traces in the impulsive limit.</p><p>If your simulate adiabatic alignment, consider increasing the time step a lot to save time.</p></body></html>"))
         self.forceDT.setStatusTip(_translate("MainWindow", "For plotting only"))
         self.forceDT.setText(_translate("MainWindow", "Force time step"))
+        self.timestep.setToolTip(_translate("MainWindow", "<html><head/><body><p>Sampling time step, not propagation time step. By default, this corresponds to 5 times the Nyquist sampling rate for traces in the impulsive limit.</p><p>If your simulate adiabatic alignment, consider increasing the time step a lot to save time.</p></body></html>"))
         self.label_28.setText(_translate("MainWindow", "ps"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuAbout.setTitle(_translate("MainWindow", "Help"))
         self.saveTrace.setText(_translate("MainWindow", "Save last trace data"))
+        self.saveTrace.setShortcut(_translate("MainWindow", "Ctrl+S"))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
+        self.actionExit.setShortcut(_translate("MainWindow", "Esc"))
         self.actionAbout.setText(_translate("MainWindow", "About"))
         self.actionClose_figures.setText(_translate("MainWindow", "Close figures"))
+        self.actionClose_figures.setShortcut(_translate("MainWindow", "Q"))
         self.actionHelp.setText(_translate("MainWindow", "Help"))
+        self.actionHelp.setShortcut(_translate("MainWindow", "?"))
         self.actionPrecalculate.setText(_translate("MainWindow", "Precalculate 2d matrix elements"))
+        self.actionPrecalculate.setShortcut(_translate("MainWindow", "C"))
 

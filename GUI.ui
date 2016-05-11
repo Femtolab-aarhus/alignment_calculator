@@ -1299,7 +1299,7 @@
       </rect>
      </property>
      <property name="toolTip">
-      <string>Kick pulse time</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Kick pulse time&lt;/p&gt;&lt;p&gt;Tip: If you need to propagate to longer times, add a second, 0 intensity pulse at t = t0 + the extra time you need.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string/>
@@ -1321,7 +1321,7 @@
       </rect>
      </property>
      <property name="toolTip">
-      <string>Kick pulse time</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Kick pulse time&lt;/p&gt;&lt;p&gt;Tip: If you need to propagate to longer times, add a second, 0 intensity pulse at t = t0 + the extra time you need.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;T&lt;span style=&quot; vertical-align:sub;&quot;&gt;0&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1460,6 +1460,9 @@
        <height>20</height>
       </rect>
      </property>
+     <property name="toolTip">
+      <string>Tip: for adiabatic alignment, Jmax can be really low.</string>
+     </property>
      <property name="layoutDirection">
       <enum>Qt::LeftToRight</enum>
      </property>
@@ -1544,7 +1547,7 @@
      <rect>
       <x>340</x>
       <y>280</y>
-      <width>91</width>
+      <width>171</width>
       <height>16</height>
      </rect>
     </property>
@@ -1600,7 +1603,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sampling time step, not propagation time step.&lt;/p&gt;&lt;p&gt;If you need to propagate to longer times, add a second, 0 intensity pulse at t = t0 + the extra time you need.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sampling time step, not propagation time step. By default, this corresponds to 5 times the Nyquist sampling rate for traces in the impulsive limit.&lt;/p&gt;&lt;p&gt;If your simulate adiabatic alignment, consider increasing the time step a lot to save time.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="statusTip">
      <string>For plotting only</string>
@@ -1620,6 +1623,9 @@
       <width>121</width>
       <height>20</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sampling time step, not propagation time step. By default, this corresponds to 5 times the Nyquist sampling rate for traces in the impulsive limit.&lt;/p&gt;&lt;p&gt;If your simulate adiabatic alignment, consider increasing the time step a lot to save time.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1680,10 +1686,16 @@
    <property name="text">
     <string>Save last trace data</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
   </action>
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Esc</string>
    </property>
   </action>
   <action name="actionAbout">
@@ -1695,15 +1707,24 @@
    <property name="text">
     <string>Close figures</string>
    </property>
+   <property name="shortcut">
+    <string>Q</string>
+   </property>
   </action>
   <action name="actionHelp">
    <property name="text">
     <string>Help</string>
    </property>
+   <property name="shortcut">
+    <string>?</string>
+   </property>
   </action>
   <action name="actionPrecalculate">
    <property name="text">
     <string>Precalculate 2d matrix elements</string>
+   </property>
+   <property name="shortcut">
+    <string>C</string>
    </property>
   </action>
  </widget>
@@ -1718,6 +1739,7 @@
   <tabstop>pumpWaist</tabstop>
   <tabstop>probeWaist</tabstop>
   <tabstop>Nshells</tabstop>
+  <tabstop>t0</tabstop>
   <tabstop>InitConditionsTab</tabstop>
   <tabstop>Temperature</tabstop>
   <tabstop>abundanceEven</tabstop>
@@ -1729,6 +1751,8 @@
   <tabstop>M</tabstop>
   <tabstop>Jmax</tabstop>
   <tabstop>cos2d</tabstop>
+  <tabstop>forceDT</tabstop>
+  <tabstop>timestep</tabstop>
   <tabstop>mybutn</tabstop>
  </tabstops>
  <resources/>

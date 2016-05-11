@@ -398,7 +398,10 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
         diag.setNameFilter("Comma Separated Values (*.csv);;Space separated Values (*.csv)");
         diag.setDefaultSuffix("csv"); # Make sure selected files end in .csv
         diag.exec();
-        filename = diag.selectedFiles()[0];
+        try:
+            filename = diag.selectedFiles()[0];
+        except IndexError:
+            filename = '';
         user_filter = diag.selectedNameFilter();
         if (user_filter == "Space separated Values (*.csv)"):
             delimiter = " ";

@@ -84,7 +84,7 @@ def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,do_psi_p
         cos2_pulse = numpy.empty((len(integration_time),))
         cos2d_pulse = numpy.empty((len(integration_time),))
         U, U0, U1, U2 = interaction.MeanCos2Matrix(Jmax,K,M,KMsign)
-        U = scipy.sparse.dia_matrix(U) # TODO: U is already sparse...
+        U = scipy.sparse.diags([U0,U1,U1,U2,U2],[0,-1,1,-2,2],[len(U0)]*2)
         if (do_cos2d):
             U2d = U2dcalc.MeanCos2dMatrix(Jmax,K,M,KMsign);
         for i in range(len(integration_time)):
@@ -96,14 +96,15 @@ def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,do_psi_p
         if (do_cos2d):
             cos2d.append(cos2d_pulse);
 
-
         if (do_psi_pulse):
             psis.append(psi_before[1:-1,:]);
             psis.append(transfer);
 
         psi = transfer[-1,:];
         last_t = t + window*FWHM;
-        
+
+    # End looping over laser pulses. Now propagate to t_end.
+
     times_after = numpy.arange(last_t,last_t+t_end,dt);
     psi_after,cos2_after,cos2d_after = propagation.fieldfree_propagation(psi,last_t,times_after,E_rot,Jmax,K,M,KMsign,do_cos2d);
     times.append(times_after[1:]);

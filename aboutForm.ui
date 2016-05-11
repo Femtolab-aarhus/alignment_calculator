@@ -70,14 +70,14 @@
   <widget class="QPushButton" name="Ok">
    <property name="geometry">
     <rect>
-     <x>200</x>
+     <x>210</x>
      <y>220</y>
      <width>91</width>
      <height>24</height>
     </rect>
    </property>
    <property name="text">
-    <string>Ok</string>
+    <string>Close</string>
    </property>
   </widget>
  </widget>

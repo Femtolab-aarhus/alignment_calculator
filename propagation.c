@@ -31,8 +31,8 @@
 
 #define M_PI 3.14159265358979323846
 
-#define min(x,y) x < y ? x : y
-#define max(x,y) x > y ? x : y
+#define min(x,y) ((x < y) ? x : y)
+#define max(x,y) ((x > y) ? x : y)
 
 
 // Fast matrix-vector multiplication when the matrix is symmetric 5-diagonal
@@ -78,8 +78,8 @@ static void matvec_nc(size_t N, const double mat[N][N], double complex out[N], c
 
      size_t i,j;
 
+     memset(out,0,N*sizeof(double complex));
      for (i = 0; i < N; i++) {
-          out[i] = 0;
           for (j = 0; j < N; j++) {
                out[i] += mat[i][j]*vec[j];
           }
@@ -231,7 +231,8 @@ struct deriv_params {
 int deriv (double t, const double psi[], double dPsidt[], void * params) {
      // Note: psi and dPsidt are complex, but GSL ode interface requires double.
      // Index 2j is the j'th real component, and 2j+1 is the j'th imaginary
-     // component.
+     // component. This is a somewhat dangerous assumption that
+     // can depend on the compiler implementation. It holds for GCC.
  
      struct deriv_params *p = params;
      size_t j;
@@ -264,7 +265,7 @@ int deriv (double t, const double psi[], double dPsidt[], void * params) {
 }
 
 
-int propagate_field_ODE(size_t Nsteps, const size_t dim, double t, double dt, double E0_sq_max, double sigma, double complex psi_t[Nsteps][dim], const double V0[], const double V1[], const double V2[], const double E_rot[]) {
+int propagate_field_ODE(size_t Nsteps, const size_t dim, double t, double dt, double E0_sq_max, double sigma, double complex psi_t[Nsteps][dim], const double V0[], const double V1[], const double V2[], const double E_rot[], double abstol, double reltol) {
 
      size_t i;
      struct deriv_params p = {dim-1,E0_sq_max,sigma,E_rot,V0,V1,V2,0};
@@ -272,8 +273,6 @@ int propagate_field_ODE(size_t Nsteps, const size_t dim, double t, double dt, do
           .dimension=2*dim,.params=&p};
 
      double initial_step_size = 2.4*sigma/150; // 150 steps per pulse
-     double abstol = 1e-8;
-     double reltol = 1e-8;
      gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new (&sys, \
                gsl_odeiv2_step_rk8pd, initial_step_size, abstol,reltol);
                // rk8pd seems fastest. Did not try the methods

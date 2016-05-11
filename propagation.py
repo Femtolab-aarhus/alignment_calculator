@@ -60,7 +60,7 @@ try: # to load the C library for propagation.
     # without GSL dependence.
     try:
         libpropagation.propagate_field_ODE.restype = ct.c_int;
-        libpropagation.propagate_field_ODE.argtypes = (ct.c_size_t, ct.c_size_t, ct.c_double, ct.c_double, ct.c_double, ct.c_double, cplx_ndptr, real_ndptr, real_ndptr, real_ndptr, real_ndptr);
+        libpropagation.propagate_field_ODE.argtypes = (ct.c_size_t, ct.c_size_t, ct.c_double, ct.c_double, ct.c_double, ct.c_double, cplx_ndptr, real_ndptr, real_ndptr, real_ndptr, real_ndptr, ct.c_double, ct.c_double);
         can_propagate_using_ODE = True;
     except:
         pass;
@@ -69,7 +69,7 @@ except OSError: # Fall back to the python implementation
     print("Not using the C propagation library (compile it with make). Propagation will be slow.",file=sys.stderr);
 
 
-def transfer_JKM(J,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=False):
+def transfer_JKM(J,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=True):
      ''' Calculate the wave function after a laser pulse acting on a molecule
      in the state |JKM>.
 
@@ -81,6 +81,8 @@ def transfer_JKM(J,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=False)
      t: Solve Schrödinger equation from from t[0] to t[1],t[2],...,t[-1]
              (the pulse is centered at t=0)
      molecule: Configuration object for the molecule.
+     use_ODE: Use the ODE solver instead of the matrix method. This is typically
+              fastest, particularly for short pulses.
      '''
 
      psi = numpy.zeros(Jmax+1,dtype=numpy.complex);
@@ -90,7 +92,7 @@ def transfer_JKM(J,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=False)
 
 
 
-def transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=False):
+def transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=True,abstol=1e-8,reltol=1e-8):
      ''' Calculate the wave function after a laser pulse acting on a molecule
      in the state \sum_J C_J|KM>.
 
@@ -103,6 +105,12 @@ def transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=False
      t: Solve Schrödinger equation from from t[0] to t[1],t[2],...,t[-1]
              (the pulse is centered at t=0)
      molecule: Configuration object for the molecule.
+     use_ODE: Use the ODE solver instead of the matrix method. This is typically
+              fastest, particularly for short pulses.
+     abstol,reltol: absolute and relative total error tolerances for the
+                    propagation over the pulse. The larger the tolerance
+                    for error, the faster the execution time. 
+                    Only used when use_ODE is True.
      '''
      A = molecule.A;
      B = molecule.B;
@@ -138,7 +146,7 @@ def transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=False
         V0 = V0*4*pi*1e-30/hbar; # Divide by hbar for solver
         V1 = V1*4*pi*1e-30/hbar;
         V2 = V2*4*pi*1e-30/hbar;
-        psi_t = propagate_ODE(psi,t,E_rot,E_0_squared_max,sigma,V0,V1,V2);
+        psi_t = propagate_ODE(psi,t,E_rot,E_0_squared_max,sigma,V0,V1,V2,abstol,reltol);
 
      return psi_t;
 
@@ -196,7 +204,7 @@ def propagate(psi_0,time,E_rot,E_0_squared_max,sigma,eig,vec):
  
      return psi_t;
 
-def propagate_ODE(psi_0,time,E_rot,E_0_squared_max,sigma,V0,V1,V2):
+def propagate_ODE(psi_0,time,E_rot,E_0_squared_max,sigma,V0,V1,V2,abstol=1e-8,reltol=1e-8):
      ''' Same as propagate, except it uses an ODE solver instead
      of the matrix method.
      
@@ -208,6 +216,7 @@ def propagate_ODE(psi_0,time,E_rot,E_0_squared_max,sigma,V0,V1,V2):
      sigma: temporal variance of the gaussian
      V0,V1,V2: the three bands of the symmetric 5 diagonal interaction matrix,
                V0 being the diagonal.
+     abstol, reltol: Error tolerances used for the ODE solver.
      
      '''
      if (numpy.any(numpy.abs(numpy.diff(numpy.diff(time)))>1e-20)):
@@ -217,7 +226,7 @@ def propagate_ODE(psi_0,time,E_rot,E_0_squared_max,sigma,V0,V1,V2):
      psi_t = numpy.empty((len(time),len(psi_0)), dtype=numpy.complex)
      psi_t[0,:] = psi_0;
      try:
-         res = libpropagation.propagate_field_ODE(len(time),len(psi_0),time[0],dt,E_0_squared_max,sigma,psi_t,V0,V1,V2,E_rot);
+         res = libpropagation.propagate_field_ODE(len(time),len(psi_0),time[0],dt,E_0_squared_max,sigma,psi_t,V0,V1,V2,E_rot, abstol, reltol);
      except:
          raise
          raise RuntimeError("For ODE propagation, you need the libpropagation C library, compiled with GSL support.");
@@ -243,8 +252,8 @@ def fieldfree_propagation(psi_0,t0,times,E_rot,Jmax,K,M,KMsign,do_cos2d=False):
             cos2d = numpy.empty((len(times),),dtype=numpy.double);
         libpropagation.fieldfree_propagation(Jmax,psi_0,t0,len(times),times,E_rot,Udiag,U1,U2,psi,cos2,do_cos2d,U2d,cos2d);
         return psi,cos2,cos2d;
-
-     U = scipy.sparse.dia_matrix(U); # This appears to be somewhat faster
+    
+     U = scipy.sparse.diags([Udiag,U1,U1,U2,U2],[0,-1,1,-2,2],[len(Udiag)]*2)
 
      phase = exp(-1j*numpy.outer(E_rot,(times-t0)));
      psi = psi_0.reshape(Jmax+1,1)*phase;
@@ -257,6 +266,6 @@ def fieldfree_propagation(psi_0,t0,times,E_rot,Jmax,K,M,KMsign,do_cos2d=False):
          cos2d = numpy.real(numpy.conj(psi)*U2d.dot(psi)).sum(0);
 
      psi=numpy.transpose(psi);
-     
+
      return psi,cos2,cos2d; # psi[t][n] contains n'th component at time index t
 
