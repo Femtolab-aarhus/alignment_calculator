@@ -24,8 +24,11 @@ This library is used to speed up calculation of 2d matrix elements.
 Without it, you must pass the -DNO_GSL switch to gcc and
 remove the -lgsl -lgslcblas flags.
 
+To compile on 64 bit Windows under mingw-w64 (use e.g. MSYS2), edit the
+Makefile first, such that the "all" target points to the .dll files instead of
+.so files, and change the compilers to x86_64-w64-mingw32-gcc and
+x86_64-w64-mingw32-gfortran.
 
-A precompiled library has been supplied for the Windows version.
+A precompiled library has been supplied for Windows 64 bit.
 The GSL source used for building the library can be found in the ext/ folder.
-
 
