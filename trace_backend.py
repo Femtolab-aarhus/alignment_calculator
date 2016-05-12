@@ -41,10 +41,6 @@ def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,do_psi_p
     cos2 = [];
     cos2d = [];
     psis = [];
-    if (do_psi_pulse):
-        a = numpy.ones((1,Jmax+1),dtype=numpy.complex);
-        a[0,:] = psi;
-        psis.append(a);
 
     last_t = laserpulses[0].t-window*laserpulses[0].FWHM-max(1e-12,5*dt); # Start 1 ps before first pulse
 
