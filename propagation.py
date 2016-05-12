@@ -122,7 +122,7 @@ def transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=True,
 
      sigma = FWHM/(2*sqrt(2*log(2)));
 
-     Js = numpy.arange(0,Jmax+1,1);
+     Js = numpy.arange(0.0,Jmax+1,1);
      E_rot = B*Js*(Js+1) + (A-B)*K**2; # *hbar / hbar for solver
 
      # Note: since V and E_0_max ends up getting multiplied together,
@@ -228,7 +228,6 @@ def propagate_ODE(psi_0,time,E_rot,E_0_squared_max,sigma,V0,V1,V2,abstol=1e-8,re
      try:
          res = libpropagation.propagate_field_ODE(len(time),len(psi_0),time[0],dt,E_0_squared_max,sigma,psi_t,V0,V1,V2,E_rot, abstol, reltol);
      except:
-         raise
          raise RuntimeError("For ODE propagation, you need the libpropagation C library, compiled with GSL support.");
      if (res != 0):
          raise RuntimeError("Basis size too small");

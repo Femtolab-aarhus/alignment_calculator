@@ -36,56 +36,84 @@
 
 
 // Fast matrix-vector multiplication when the matrix is symmetric 5-diagonal
-// Assumes the dimension is at least 4x4 !
-static void fast2band(const size_t N, const double diag[N], const double band1[N-1], const double band2[N-2], double complex psi_out[N], const double complex psi[N]) {
+void fast2band(const size_t N, const double diag[N], const double band1[N-1], const double band2[N-2], double complex out[N], const double complex in[N]) {
 
      size_t i;
 
-     assert(N>3);
+     if (N > 3) {
+     out[0] = diag[0]*in[0] + band1[0]*in[1] + band2[0]*in[2];
 
-     psi_out[0] = diag[0]*psi[0] + band1[0]*psi[1] + band2[0]*psi[2];
-
-     psi_out[1] = diag[1]*psi[1] + band1[0]*psi[0] + band1[1]*psi[2] + band2[0]*psi[3];
-
+     out[1] = diag[1]*in[1] + band1[0]*in[0] + band1[1]*in[2] + band2[1]*in[3];
+     
      for (i = 2; i < N-2; i++) {
-          psi_out[i] = diag[i]*psi[i];
-          psi_out[i] += band1[i]*psi[i+1];
-          psi_out[i] += band1[i-1]*psi[i-1];
-          psi_out[i] += band2[i]*psi[i+2];
-          psi_out[i] += band2[i-2]*psi[i-2];
+          out[i] = diag[i]*in[i]+band1[i]*in[i+1]+band1[i-1]*in[i-1]+band2[i]*in[i+2]+band2[i-2]*in[i-2];
      }
 
-     psi_out[N-2] = diag[N-2]*psi[N-2] + band2[N-4]*psi[N-4] + \
-                band1[N-3]*psi[N-3] + band1[N-2]*psi[N-1];
-     psi_out[N-1] = diag[N-1]*psi[N-1] + band2[N-3]*psi[N-3];
+     out[N-2] = diag[N-2]*in[N-2] + band2[N-4]*in[N-4] + \
+                band1[N-3]*in[N-3] + band1[N-2]*in[N-1];
+     out[N-1] = diag[N-1]*in[N-1] + band1[N-2]*in[N-2] + band2[N-3]*in[N-3];
+
+     } else { // N <= 3 
+          for (i = 0; i < N; i++) out[i] = diag[i]*in[i];
+          if (N == 2) {
+               out[0] += in[1]*band1[0];
+               out[1] += in[0]*band1[0];
+          } else if (N == 3) {
+               out[0] += in[1]*band1[0]+in[2]*band2[0];
+               out[1] += in[0]*band1[0]+in[2]*band1[1];
+               out[2] += in[0]*band2[0]+in[1]*band1[1];
+          }
+     }
+}
+
+// nc: no clobber, i.e. no overwriting of the input vector. 
+static void matvec_nc(const size_t N, const double mat[N][N], double complex out[N], const double complex vec[N]) {
+
+     size_t i,j,k;
+     // Do the matrix-vector operation num_rows matrix rows at a time.
+     // This utilizes the CPU cache and the register bank better, as we only
+     // need to reload the input vector N/num_rows times instead of N times.
+     // At some point, we start to have to reload rows into the cache/registers
+     // so there is an optimal num_rows size.
+     // On my laptop, this is 4. Some other machine might have a
+     // diferent optimal num_rows size, eg. machines with more registers,
+     // like ones with the AVX-512 instruction set.
+     const size_t num_rows=4; 
+     double complex tmp[num_rows];
+
+     const size_t remaining_rows = N%num_rows;
+     
+     for (i = 0; i < N-remaining_rows; i+=num_rows) {
+          for (k = 0; k < num_rows; k++) tmp[k]=0;
+          for (j = 0; j < N; j++) {
+               for (k = 0; k < num_rows; k++) {
+                    tmp[k] += mat[i+k][j]*vec[j];
+               }
+          }
+          for (k = 0; k < num_rows; k++) {
+               out[i+k] = tmp[k];
+          }
+     }
+     // Do the remaining rows  
+     for (k = 0; k < remaining_rows; k++) tmp[k]=0;
+     for (j = 0; j < N; j++) {
+          for (k = 0; k < remaining_rows; k++) {
+               tmp[k] += mat[i+k][j]*vec[j];
+          }
+     }
+     for (k = 0; k < remaining_rows; k++) {
+          out[N-remaining_rows+k] = tmp[k];
+     }
 }
 
 static void matvec(size_t N, const double mat[N][N], double complex vec[N]) {
 
      double complex out[N];
-     size_t i,j;
-
-     for (i = 0; i < N; i++) {
-          out[i] = 0;
-          for (j = 0; j < N; j++) {
-               out[i] += mat[i][j]*vec[j];
-          }
-     }
+     matvec_nc(N,mat,out,vec);
      memcpy(vec,out,N*sizeof(double complex));
 }
 
-static void matvec_nc(size_t N, const double mat[N][N], double complex out[N], const double complex vec[N]) {
-
-     size_t i,j;
-
-     memset(out,0,N*sizeof(double complex));
-     for (i = 0; i < N; i++) {
-          for (j = 0; j < N; j++) {
-               out[i] += mat[i][j]*vec[j];
-          }
-     }
-}
-
+/* TODO: optimize this as well */
 static void matTvec(size_t N, const double mat[N][N], double complex vec[N]) {
 
      double complex out[N];
@@ -109,7 +137,7 @@ static void vecvec(size_t N, double complex v1[N], const double complex v2[N]) {
           v1[i] = v1[i]*v2[i];
      }
 }
-/*
+
 static double complex dot(size_t N, const double complex a[N], const double complex b[N]) {
      complex double res;
      size_t i;
@@ -123,7 +151,7 @@ static double complex dot(size_t N, const double complex a[N], const double comp
 static double norm(size_t N, const double complex a[N]) {
      return sqrt(creal(dot(N,a,a)));
 }
-*/
+
 
 
 void fieldfree_propagation(size_t Jmax, const double complex psi_0[Jmax+1], double t0, size_t num_times, const double times[num_times], const double E_rot[Jmax+1], const double Udiag[Jmax+1], const double Uband1[Jmax], const double Uband2[Jmax-1], double complex psi_result[num_times][Jmax+1], double cos2[num_times], _Bool do_cos2d, const double U2d[Jmax+1][Jmax+1], double cos2d[num_times]) {
@@ -220,13 +248,12 @@ int propagate_field(size_t Nsteps, size_t Nsteps_inner, size_t dim, double t, do
 
 #ifndef NO_GSL
 struct deriv_params {
-     size_t jmax;
+     size_t dim;
      double peak_field_amplitude_squared, sigma;
      const double *E_rot;
      const double *V0, *V1, *V2;
      int ncalls;
 };
-
 
 int deriv (double t, const double psi[], double dPsidt[], void * params) {
      // Note: psi and dPsidt are complex, but GSL ode interface requires double.
@@ -236,7 +263,7 @@ int deriv (double t, const double psi[], double dPsidt[], void * params) {
  
      struct deriv_params *p = params;
      size_t j;
-     const size_t jmax = p->jmax;
+     const size_t dim = p->dim;
      // Gaussian pulse:
      double E_0_squared = p->peak_field_amplitude_squared * \
                           exp(-t*t/(2*(p->sigma)*(p->sigma)));
@@ -244,14 +271,13 @@ int deriv (double t, const double psi[], double dPsidt[], void * params) {
 
      
      // Multiply the interaction term
-     fast2band(jmax+1,p->V0,p->V1,p->V2,(double complex *) dPsidt, (const double complex *) psi);
+     fast2band(dim,p->V0,p->V1,p->V2,(double complex *) dPsidt, (const double complex *) psi);
+
      // Then add the diagonal and multiply every component with -i.
      // I.e. -i*(a+ib) = b-ia.
-     for (j = 0; j < jmax; j++) {
-          dPsidt[2*j] *= E_0_squared;
-          dPsidt[2*j+1] *= E_0_squared;
-          dPsidt[2*j] += p->E_rot[j]*psi[2*j];
-          dPsidt[2*j+1] += p->E_rot[j]*psi[2*j+1];
+     for (j = 0; j < dim; j++) {
+          dPsidt[2*j] = E_0_squared*dPsidt[2*j] + p->E_rot[j]*psi[2*j];
+          dPsidt[2*j+1] = E_0_squared*dPsidt[2*j+1] + p->E_rot[j]*psi[2*j+1];
 
           // Multiplication by -i:
           tmp = dPsidt[2*j+1]; // Imaginary part
@@ -260,7 +286,6 @@ int deriv (double t, const double psi[], double dPsidt[], void * params) {
      }
 
      //p->ncalls++;
-
      return GSL_SUCCESS;
 }
 
@@ -268,11 +293,11 @@ int deriv (double t, const double psi[], double dPsidt[], void * params) {
 int propagate_field_ODE(size_t Nsteps, const size_t dim, double t, double dt, double E0_sq_max, double sigma, double complex psi_t[Nsteps][dim], const double V0[], const double V1[], const double V2[], const double E_rot[], double abstol, double reltol) {
 
      size_t i;
-     struct deriv_params p = {dim-1,E0_sq_max,sigma,E_rot,V0,V1,V2,0};
+     struct deriv_params p = {dim,E0_sq_max,sigma,E_rot,V0,V1,V2,0};
      gsl_odeiv2_system sys = {.function=deriv,.jacobian=NULL,\
           .dimension=2*dim,.params=&p};
 
-     double initial_step_size = 2.4*sigma/150; // 150 steps per pulse
+     double initial_step_size = min(2.4*sigma/150,E_rot[dim-1]/5.7); // 150 steps per pulse
      gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new (&sys, \
                gsl_odeiv2_step_rk8pd, initial_step_size, abstol,reltol);
                // rk8pd seems fastest. Did not try the methods
@@ -283,6 +308,8 @@ int propagate_field_ODE(size_t Nsteps, const size_t dim, double t, double dt, do
                //gsl_odeiv2_step_rk2, initial_step_size, abstol,reltol);
                //gsl_odeiv2_step_rkf45, initial_step_size, abstol,reltol);
 
+     //gsl_odeiv2_driver_set_hmax(d,max step);
+
      double t_run = t;
 
      for (i = 1; i < Nsteps; i++) {
@@ -290,13 +317,10 @@ int propagate_field_ODE(size_t Nsteps, const size_t dim, double t, double dt, do
           memcpy(psi_t[i],psi_t[i-1],sizeof(double complex)*dim);
           gsl_odeiv2_driver_apply(d,&t_run,t+(double)i*dt,(double *) psi_t[i]);
      
-          // In the truncated basis, the ODE equation interaction term
-          // never transfers population to the lase expansion coefficient.
-          // For K=0 (eg linear molecules) also it does not allow population
-          // of the last two levels. Therefore, we check the levels
-          // before that.
-          if (fmax(pow(cabs(psi_t[i][dim-4]),2),pow(cabs(psi_t[i][dim-3]),2)) > 1e-5)
+          if (fmax(pow(cabs(psi_t[i][dim-2]),2),pow(cabs(psi_t[i][dim-1]),2)) > 1e-5) {
+               gsl_odeiv2_driver_free(d);
                return 1; // Basis size too small
+          }
 
      }
 
