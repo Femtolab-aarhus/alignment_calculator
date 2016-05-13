@@ -18,7 +18,6 @@
 #   You should have received a copy of the GNU General Public License
 #   along with Alignment calculator. If not, see <http://www.gnu.org/licenses/>.
 
-
 import numpy
 import numpy as np
 import scipy
@@ -41,6 +40,7 @@ import sys
 from itertools import repeat
 import tempfile
 import utils
+import os
 
 libpropagation = None;
 can_propagate_using_ODE = False;
@@ -52,9 +52,9 @@ try: # to load the C library for propagation.
     cplx_ndptr = ndpointer(flags=("CONTIGUOUS",),dtype=numpy.complex);
     real_ndptr = ndpointer(flags=("CONTIGUOUS",),dtype=numpy.double);
     libpropagation.fieldfree_propagation.restype = None;
-    libpropagation.fieldfree_propagation.argtypes = (ct.c_int, cplx_ndptr, ct.c_double, ct.c_size_t, real_ndptr, real_ndptr, real_ndptr, real_ndptr, real_ndptr, cplx_ndptr, real_ndptr, ct.c_bool, real_ndptr, real_ndptr);
+    libpropagation.fieldfree_propagation.argtypes = (ct.c_int, ct.c_int, ct.c_size_t, cplx_ndptr, ct.c_double, ct.c_size_t, real_ndptr, real_ndptr, real_ndptr, real_ndptr, real_ndptr, cplx_ndptr, real_ndptr, ct.c_bool, real_ndptr, real_ndptr);
     libpropagation.propagate_field.restype = ct.c_int;
-    libpropagation.propagate_field.argtypes = (ct.c_size_t, ct.c_size_t, ct.c_size_t, ct.c_double, ct.c_double, ct.c_double, ct.c_double, cplx_ndptr, real_ndptr, real_ndptr, cplx_ndptr, cplx_ndptr);
+    libpropagation.propagate_field.argtypes = (ct.c_size_t, ct.c_size_t, ct.c_size_t, ct.c_double, ct.c_double, ct.c_double, ct.c_double, cplx_ndptr, real_ndptr, real_ndptr, real_ndptr, cplx_ndptr, cplx_ndptr);
     
     # Don't use the ODE method if it is not available, i.e. if we compiled
     # without GSL dependence.
@@ -62,6 +62,11 @@ try: # to load the C library for propagation.
         libpropagation.propagate_field_ODE.restype = ct.c_int;
         libpropagation.propagate_field_ODE.argtypes = (ct.c_size_t, ct.c_size_t, ct.c_double, ct.c_double, ct.c_double, ct.c_double, cplx_ndptr, real_ndptr, real_ndptr, real_ndptr, real_ndptr, ct.c_double, ct.c_double);
         can_propagate_using_ODE = True;
+    except:
+        print("ODE method not compiled into the C library.",file=sys.stderr);
+    try:
+        if (os.environ["ALIGNMENT_CALC_MAY_USE_ODE_SOLVER"] == "NO"):
+            can_propagate_using_ODE = False;
     except:
         pass;
 
@@ -168,7 +173,10 @@ def propagate(psi_0,time,E_rot,E_0_squared_max,sigma,eig,vec):
          raise RuntimeError("Pulse time steps must be equidistant.");
 
      # Within the maximum time step, a Gaussian is approximately constant.
-     dt_max = 2.4*sigma/150; 
+     if (len(E_rot) > 3):
+        dt_max = min(2.4*sigma/150,1/(E_rot[-1]-E_rot[-3]));
+     else:
+        dt_max = min(2.4*sigma/150,1/E_rot[-1]);
      dt = time[1]-time[0];
      # If our given time step is larger than this, use a smaller time step
      if (dt > dt_max):
@@ -182,8 +190,9 @@ def propagate(psi_0,time,E_rot,E_0_squared_max,sigma,eig,vec):
     
      psi_t = numpy.empty((len(time),len(psi_0)), dtype=numpy.complex)
      psi_t[0,:] = psi_0;
+     vecT = numpy.ascontiguousarray(vec.T);
      if (libpropagation):
-         res = libpropagation.propagate_field(len(time),scale,len(psi_0),time[0],dt,E_0_squared_max,sigma,psi_t,eig,vec,expRot,expRot2);
+         res = libpropagation.propagate_field(len(time),scale,len(psi_0),time[0],dt,E_0_squared_max,sigma,psi_t,eig,vec,vecT,expRot,expRot2);
          if (res != 0):
              raise RuntimeError("Basis size too small");
      else:
@@ -196,7 +205,7 @@ def propagate(psi_0,time,E_rot,E_0_squared_max,sigma,eig,vec):
                     psi_t[i,:] = expRot*psi_t[i,:];
                 tp = t+k*dt;
                 E_0_squared = E_0_squared_max * numpy.exp(-(tp**2)/(2*sigma**2)); 
-                psi_t[i,:] = ((numpy.exp(-dt*E_0_squared*1j*eig))*vec).dot(vec.T.dot(psi_t[i,:]));
+                psi_t[i,:] = ((numpy.exp(-dt*E_0_squared*1j*eig))*vec).dot(vecT.dot(psi_t[i,:]));
                 if (numpy.max(numpy.abs(psi_t[i,-2:])**2) > 1e-5):
                     raise RuntimeError("Basis size too small");
             psi_t[i,:] = expRot2*psi_t[i,:];
@@ -234,7 +243,6 @@ def propagate_ODE(psi_0,time,E_rot,E_0_squared_max,sigma,V0,V1,V2,abstol=1e-8,re
  
      return psi_t;
 
-
 def fieldfree_propagation(psi_0,t0,times,E_rot,Jmax,K,M,KMsign,do_cos2d=False):
 
      U, Udiag, U1, U2 = interaction.MeanCos2Matrix(Jmax,K,M,KMsign);
@@ -244,12 +252,12 @@ def fieldfree_propagation(psi_0,t0,times,E_rot,Jmax,K,M,KMsign,do_cos2d=False):
      else:
         U2d = U;
     
-     if (libpropagation and Jmax >= 3): # Call a C function instead of using numpy.
+     if (libpropagation and Jmax>0): # Call a C function instead of using numpy.
         psi = numpy.empty((len(times),Jmax+1),dtype=numpy.complex);
         cos2 = numpy.empty((len(times),),dtype=numpy.double);
         if (do_cos2d):
             cos2d = numpy.empty((len(times),),dtype=numpy.double);
-        libpropagation.fieldfree_propagation(Jmax,psi_0,t0,len(times),times,E_rot,Udiag,U1,U2,psi,cos2,do_cos2d,U2d,cos2d);
+        libpropagation.fieldfree_propagation(K,M,Jmax,psi_0,t0,len(times),times,E_rot,Udiag,U1,U2,psi,cos2,do_cos2d,U2d,cos2d);
         return psi,cos2,cos2d;
     
      U = scipy.sparse.diags([Udiag,U1,U1,U2,U2],[0,-1,1,-2,2],[len(Udiag)]*2)

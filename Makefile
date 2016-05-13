@@ -14,6 +14,8 @@ FORT = gfortran
 
 WARNINGS = -std=c11 -pedantic -Wall -Wextra -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wnested-externs -D_POSIX_C_SOURCE=20160116
 
+# -fstack-protector-all  is useful for debugging.
+
 CFLAGS = $(WARNINGS) -Wall -mtune=native -march=native -msse2 -pipe -fpic -Ofast -ffast-math -fassociative-math -funroll-loops -fuse-linker-plugin -frename-registers -fweb -fomit-frame-pointer -funswitch-loops -funsafe-math-optimizations -fno-common
 
 OPENMP = -fopenmp # Comment out to remove openmp support

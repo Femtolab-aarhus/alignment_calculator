@@ -34,9 +34,10 @@
 #define min(x,y) ((x < y) ? x : y)
 #define max(x,y) ((x > y) ? x : y)
 
+#define ODD(n) ((n)&1) // n (un)signed integer
 
 // Fast matrix-vector multiplication when the matrix is symmetric 5-diagonal
-void fast2band(const size_t N, const double diag[N], const double band1[N-1], const double band2[N-2], double complex out[N], const double complex in[N]) {
+static void fast2band(const size_t N, const double diag[N], const double band1[N-1], const double band2[N-2], double complex out[N], const double complex in[N]) {
 
      size_t i;
 
@@ -66,6 +67,29 @@ void fast2band(const size_t N, const double diag[N], const double band1[N-1], co
      }
 }
 
+// Fast matrix-vector multiplication when the matrix is symmetric 3-diagonal
+void fast1band(const size_t N, const double diag[N], const double band[N-1], double complex out[N], const double complex in[N]) {
+
+     size_t i;
+
+     if (N > 2) {
+     out[0] = diag[0]*in[0] + band[0]*in[1];
+     for (i = 1; i < N-1; i++) {
+          out[i] = diag[i]*in[i] + band[i]*in[i+1] + band[i-1]*in[i-1];
+     }
+     out[N-1] = diag[N-1]*in[N-1] + band[N-2]*in[N-2];
+
+     } else { // N <= 2
+          for (i = 0; i < N; i++) out[i] = diag[i]*in[i];
+          if (N == 2) {
+               out[0] += in[1]*band[0];
+               out[1] += in[0]*band[0];
+          }
+     }
+}
+
+
+
 // nc: no clobber, i.e. no overwriting of the input vector. 
 static void matvec_nc(const size_t N, const double mat[N][N], double complex out[N], const double complex vec[N]) {
 
@@ -78,7 +102,7 @@ static void matvec_nc(const size_t N, const double mat[N][N], double complex out
      // On my laptop, this is 4. Some other machine might have a
      // diferent optimal num_rows size, eg. machines with more registers,
      // like ones with the AVX-512 instruction set.
-     const size_t num_rows=4; 
+     const size_t num_rows=4; //important that this is known at compile time!
      double complex tmp[num_rows];
 
      const size_t remaining_rows = N%num_rows;
@@ -112,8 +136,7 @@ static void matvec(size_t N, const double mat[N][N], double complex vec[N]) {
      matvec_nc(N,mat,out,vec);
      memcpy(vec,out,N*sizeof(double complex));
 }
-
-/* TODO: optimize this as well */
+/*
 static void matTvec(size_t N, const double mat[N][N], double complex vec[N]) {
 
      double complex out[N];
@@ -129,7 +152,7 @@ static void matTvec(size_t N, const double mat[N][N], double complex vec[N]) {
      }
 
      memcpy(vec,out,N*sizeof(double complex));
-}
+}*/
 
 static void vecvec(size_t N, double complex v1[N], const double complex v2[N]) {
      size_t i;
@@ -138,7 +161,7 @@ static void vecvec(size_t N, double complex v1[N], const double complex v2[N]) {
      }
 }
 
-static double complex dot(size_t N, const double complex a[N], const double complex b[N]) {
+double complex dot(size_t N, const double complex a[N], const double complex b[N]) {
      complex double res;
      size_t i;
 
@@ -148,23 +171,78 @@ static double complex dot(size_t N, const double complex a[N], const double comp
      }
      return res;
 }
-static double norm(size_t N, const double complex a[N]) {
+double norm(size_t N, const double complex a[N]) {
      return sqrt(creal(dot(N,a,a)));
 }
 
 
+int detect_parity(size_t dim, const double complex psi[dim]) {
+     size_t i;
 
-void fieldfree_propagation(size_t Jmax, const double complex psi_0[Jmax+1], double t0, size_t num_times, const double times[num_times], const double E_rot[Jmax+1], const double Udiag[Jmax+1], const double Uband1[Jmax], const double Uband2[Jmax-1], double complex psi_result[num_times][Jmax+1], double cos2[num_times], _Bool do_cos2d, const double U2d[Jmax+1][Jmax+1], double cos2d[num_times]) {
+     _Bool possible_parity[2] = {true,true};
 
+     for (i = 0; i < dim; i++) {
+          if (psi[i] != 0) possible_parity[i&1]=false;
+     }
+
+     if (possible_parity[0]) return -1;
+     if (possible_parity[1]) return 1;
+     return 0;
+}
+
+static int reduce_cos2dmat(int K, int M, size_t Jmax, size_t *dimm, const double complex psi_0[Jmax+1], void *buffer,const double U2d[Jmax+1][Jmax+1]) {
+
+     size_t i,j;
+     int parity;
+     unsigned int offset;
+     size_t dim;
+
+
+     if (K == 0 || M == 0) {
+          parity = detect_parity(Jmax+1,psi_0);
+          if (parity != 0) {
+               dim = (parity==1) ? (Jmax+1)/2 + ODD(Jmax+1) : Jmax/2 + ODD(Jmax);
+               *dimm = dim;
+               offset = (parity == 1) ? 0 : 1;
+               double (*U2d_reduced)[dim][dim] = buffer;
+               for (i = 0; i < dim; i++)
+                    for (j = 0; j < dim; j++) {
+                         (*U2d_reduced)[i][j] = U2d[2*i+offset][2*j+offset];
+                    }
+
+               return parity;
+          }
+     }
+     return 0;
+}
+
+static inline void downscale(size_t dim, size_t jmax, unsigned int offset, double complex out[dim], double complex in[jmax+1]) {
+     size_t i;
+     for (i = 0; i < dim; i++) out[i] = in[2*i+offset];
+}
+
+void fieldfree_propagation(int K, int M, const size_t Jmax, const double complex psi_0[Jmax+1], double t0, size_t num_times, const double times[num_times], const double E_rot[Jmax+1], const double Udiag[Jmax+1], const double Uband1[Jmax], const double Uband2[Jmax-1], double complex psi_result[num_times][Jmax+1], double cos2[num_times], const _Bool do_cos2d, const double U2d[Jmax+1][Jmax+1], double cos2d[num_times]) {
 
      size_t i;
      double t, Dt;
-     double complex phase, U_psi[Jmax+1], U2d_psi[Jmax+1];
+     double complex phase, U_psi[Jmax+1];
      double complex phase_incr, phase_incr_base;
-     double Bconst;
+     double Bconst = (E_rot[1]-E_rot[0])/2; // also works for symmetric tops!
      size_t J;
+     int parity = 0;
+     unsigned int offset = 0;
+     size_t dim = 0;
+     double U2d_reduced[(Jmax/2+2)*(Jmax/2+2)]; //Allocate enough, if a bit much
 
-     Bconst = (E_rot[2]-E_rot[1])/4; // also works for symmetric tops!
+     if (do_cos2d) {
+          // Check if the wave function has parity.
+          // If it does, we don't need to multiply every other row in the
+          // U2d matrix.
+          parity = reduce_cos2dmat(K,M,Jmax,&dim,psi_0,U2d_reduced,U2d);
+          offset = (parity == 1) ? 0 : 1;
+     }
+
+     double complex U2d_psi[dim], psi_downscaled[dim];
 
      for (i = 0; i < num_times; i++) {
      
@@ -179,7 +257,10 @@ void fieldfree_propagation(size_t Jmax, const double complex psi_0[Jmax+1], doub
 
           // The same as the commented out code,
           // but exploits the Bj(j+1) structure of the energy levels.
-          // This avoids the very costly evaluation of cexp()
+          // exp(-i*B*j*(j+1)) = exp(-i*B*j*(j-1)*exp(-2Bj*i)
+          // = exp(-i*B*j*(j-1)*exp(-2B*i)^j,
+          // i.e. phase(j) = phase(j-1)*exp(-2B*i)^j
+          // This avoids the very costly evaluation of cexp() multiple times.
           // Note: It won't work if you want to implement centrifugal
           // distorsion.
           
@@ -203,19 +284,31 @@ void fieldfree_propagation(size_t Jmax, const double complex psi_0[Jmax+1], doub
           
           // U2d_psi = U2d dot psi, if U2d is specified
           if (do_cos2d) {
-               // U2d_psi = U2d dot psi
-               matvec_nc(Jmax+1, U2d, U2d_psi, psi_result[i]);
                cos2d[i] = 0;
-               for (J = 0; J <= Jmax; J++)
-                    cos2d[i] += conj(psi_result[i][J])*U2d_psi[J];
-          }
+               // U2d_psi = U2d dot psi
+               if (parity == 0) {
+                    matvec_nc(Jmax+1, U2d, U_psi, psi_result[i]);
+                    for (J = 0; J <= Jmax; J++)
+                         cos2d[i] += conj(psi_result[i][J])*U_psi[J];
+               } else {
+                    // Use the downscaled U2d matrix because every other
+                    // entry in psi is 0. This gives a fairly significant
+                    // speedup
+                    downscale(dim,Jmax,offset,psi_downscaled,psi_result[i]);
+                    matvec_nc(dim,(const double (*)[dim]) &U2d_reduced[0],U2d_psi,psi_downscaled);
+                    for (J=0; J<dim; J++) {
+                         cos2d[i] += conj(psi_downscaled[J])*U2d_psi[J];
+                    }
 
+               }
+          }
      }
 }
 
+
 // Like the python version, except without all the implicit memory allocations
 // and deallocations
-int propagate_field(size_t Nsteps, size_t Nsteps_inner, size_t dim, double t, double dt, double E0_sq_max, double sigma, double complex psi_t[Nsteps][dim], const double eig[dim], const double eigvec[dim][dim], const double complex expRot[dim], const double complex expRot2[dim]) {
+int propagate_field(size_t Nsteps, size_t Nsteps_inner, size_t dim, double t, double dt, double E0_sq_max, double sigma, double complex psi_t[Nsteps][dim], const double eig[dim], const double eigvec[dim][dim], const double eigvecT[dim][dim], const double complex expRot[dim], const double complex expRot2[dim]) {
      
 
      size_t i, j, k;
@@ -228,7 +321,8 @@ int propagate_field(size_t Nsteps, size_t Nsteps_inner, size_t dim, double t, do
           for (k = 0; k < Nsteps_inner; k++) {
                if (k > 0)
                     vecvec(dim,psi_t[i],expRot); // psi = expRot*psi;
-               matTvec(dim,eigvec,psi_t[i]); // psi = eigvec^T dot psi
+               //matTvec(dim,eigvec,psi_t[i]); // psi = eigvec^T dot psi
+               matvec(dim,eigvecT,psi_t[i]); // psi = eigvec^T dot psi
                fac = -E0_sq_max*exp(-(t*t)/(2*sigma_sq))*dt;
                t = t + dt;
                for (j = 0; j < dim; j++) // psi = psi*exp(the diagonal)
@@ -297,7 +391,7 @@ int propagate_field_ODE(size_t Nsteps, const size_t dim, double t, double dt, do
      gsl_odeiv2_system sys = {.function=deriv,.jacobian=NULL,\
           .dimension=2*dim,.params=&p};
 
-     double initial_step_size = min(2.4*sigma/150,E_rot[dim-1]/5.7); // 150 steps per pulse
+     double initial_step_size = min(2.4*sigma/150,1/E_rot[dim-1]/5.7); // 150 steps per pulse
      gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new (&sys, \
                gsl_odeiv2_step_rk8pd, initial_step_size, abstol,reltol);
                // rk8pd seems fastest. Did not try the methods

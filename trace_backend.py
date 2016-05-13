@@ -114,7 +114,6 @@ def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,do_psi_p
 
     if (do_psi_pulse):
         psis = numpy.concatenate(psis);
-
     return times,cos2,cos2d,psis
 
 

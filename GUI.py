@@ -42,6 +42,7 @@ import utils
 import gc
 import multiprocessing
 import U2dcalc
+import propagation
 
 
 #cmd = sys.executable;
@@ -87,6 +88,13 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
         self.ui.forceDT.clicked.connect(self.force_timestep_click);
         self.ui.Jmax.textChanged.connect(self.update_timestep);
         self.ui.cos2d.clicked.connect(self.update_timestep);
+
+        if (not propagation.can_propagate_using_ODE):
+            self.ui.doODE.setEnabled(False);
+            self.ui.doMatrix.setChecked(True);
+
+        self.ui.doODE.clicked.connect(self.doODE_click);
+        self.ui.doMatrix.clicked.connect(self.doMatrix_click);
 
         self.ensemble = [];
 
@@ -144,6 +152,13 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
 
     def force_timestep_click(self,checked):
         self.ui.timestep.setEnabled(checked)
+    
+    def doODE_click(self,checked):
+        if (checked):
+            os.environ["ALIGNMENT_CALC_MAY_USE_ODE_SOLVER"] = "YES";
+    def doMatrix_click(self,checked):
+        if (checked):
+            os.environ["ALIGNMENT_CALC_MAY_USE_ODE_SOLVER"] = "NO";
 
 
     def closeEvent(self, event):
