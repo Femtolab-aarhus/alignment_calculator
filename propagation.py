@@ -22,7 +22,6 @@ import numpy
 import numpy as np
 import scipy
 import scipy.integrate
-import scipy.sparse
 from scipy.integrate import ode
 from scipy import linalg
 from numpy import exp,log,sqrt,pi
@@ -250,7 +249,7 @@ def fieldfree_propagation(psi_0,t0,times,E_rot,Jmax,K,M,KMsign,do_cos2d=False):
      if (do_cos2d):
         U2d = U2dcalc.MeanCos2dMatrix(Jmax,K,M,KMsign);
      else:
-        U2d = U;
+        U2d = numpy.array([]);
     
      if (libpropagation and Jmax>0): # Call a C function instead of using numpy.
         psi = numpy.empty((len(times),Jmax+1),dtype=numpy.complex);
@@ -260,8 +259,6 @@ def fieldfree_propagation(psi_0,t0,times,E_rot,Jmax,K,M,KMsign,do_cos2d=False):
         libpropagation.fieldfree_propagation(K,M,Jmax,psi_0,t0,len(times),times,E_rot,Udiag,U1,U2,psi,cos2,do_cos2d,U2d,cos2d);
         return psi,cos2,cos2d;
     
-     U = scipy.sparse.diags([Udiag,U1,U1,U2,U2],[0,-1,1,-2,2],[len(Udiag)]*2)
-
      phase = exp(-1j*numpy.outer(E_rot,(times-t0)));
      psi = psi_0.reshape(Jmax+1,1)*phase;
     

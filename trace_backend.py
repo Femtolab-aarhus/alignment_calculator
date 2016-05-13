@@ -80,7 +80,6 @@ def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,do_psi_p
         cos2_pulse = numpy.empty((len(integration_time),))
         cos2d_pulse = numpy.empty((len(integration_time),))
         U, U0, U1, U2 = interaction.MeanCos2Matrix(Jmax,K,M,KMsign)
-        U = scipy.sparse.diags([U0,U1,U1,U2,U2],[0,-1,1,-2,2],[len(U0)]*2)
         if (do_cos2d):
             U2d = U2dcalc.MeanCos2dMatrix(Jmax,K,M,KMsign);
         for i in range(len(integration_time)):

@@ -20,6 +20,7 @@
 import numpy
 import random
 import scipy
+import scipy.sparse
 from scipy import linalg
 from numpy import sqrt
 import os,sys
@@ -107,34 +108,42 @@ def MeanCos2Matrix(Jmax,K,M,KMsign):
          pass;
 
 
-     # Wigner 3J symbols: CJJxM=(J J+x 2; M -M 0), see Zare p. 63
-     
-     U = numpy.zeros((Jmax+1,Jmax+1));
- 
+     A2array = numpy.array([A2(i) for i in range(2*(Jmax+1)+6)]);
      Jmin = max(K,M);
 
-     for J in range(Jmin, Jmax+1):
-          CJJM = oddsign(J-M) * A2(2*J+3)*2*(3*M*M-J*(J+1));
-          CJJK = oddsign(J-K) * A2(2*J+3)*2*(3*K*K-J*(J+1));
-          
-          U[J][J] = (2.0*(2*J+1)*oddsign(M-K)*CJJM*CJJK + 1.0)/3.0;
+     prep = numpy.zeros(Jmin);
+     J = numpy.arange(Jmin,Jmax+1);
 
-          if (J < Jmax):
-               CJJ1M=oddsign(J+M+1)*A2(2*J+4)*2.0*M*sqrt(6*(J-M+1)*(J+M+1));
-               CJJ1K=oddsign(J+K+1)*A2(2*J+4)*2.0*K*sqrt(6*(J-K+1)*(J+K+1));
-               
-               U[J][J+1] = 2.0*sqrt((2*J+1)*(2*J+3))*oddsign(M-K)*CJJ1M*CJJ1K*KMsign/3.0;
-               U[J+1][J] = U[J][J+1];
-          
-          if (J < Jmax-1):
-               CJJ2M=oddsign(J+M)*A2(2*J+5)*sqrt(6*(J+M+2)*(J+M+1)*(J-M+2)*(J-M+1));
-               CJJ2K=oddsign(J+K)*A2(2*J+5)*sqrt(6*(J+K+2)*(J+K+1)*(J-K+2)*(J-K+1));
-               U[J][J+2] = 2.0*sqrt((2*J+1)*(2*J+5))*oddsign(M-K)*CJJ2M*CJJ2K/3.0;
-               U[J+2][J] = U[J][J+2];
+     # Wigner 3J symbols: CJJxM=(J J+x 2; M -M 0), see Zare p. 63
+     CJJM = oddsign(J-M) * A2array[2*J+3]*2*(3*M*M-J*(J+1));
+     CJJK = oddsign(J-K) * A2array[2*J+3]*2*(3*K*K-J*(J+1));
+     diag = (2.0*(2*J+1)*oddsign(M-K)*CJJM*CJJK + 1.0)/3.0;
+     diag = numpy.concatenate((prep,diag))[0:(Jmax+1)];
 
-     diag = numpy.ascontiguousarray(numpy.diag(U,0));
-     U1 = numpy.ascontiguousarray(numpy.diag(U,1));
-     U2 = numpy.ascontiguousarray(numpy.diag(U,2));
+     J = J[:-1];
+     CJJ1M=oddsign(J+M+1)*A2array[2*J+4]*2.0*M*sqrt(6*(J-M+1)*(J+M+1));
+     CJJ1K=oddsign(J+K+1)*A2array[2*J+4]*2.0*K*sqrt(6*(J-K+1)*(J+K+1));
+     U1 = 2.0*sqrt((2*J+1)*(2*J+3))*oddsign(M-K)*CJJ1M*CJJ1K*KMsign/3.0;
+     U1 = numpy.concatenate((prep,U1))[0:Jmax];
+
+     J = J[:-1];
+     CJJ2M=oddsign(J+M)*A2array[2*J+5]*sqrt(6*(J+M+2)*(J+M+1)*(J-M+2)*(J-M+1));
+     CJJ2K=oddsign(J+K)*A2array[2*J+5]*sqrt(6*(J+K+2)*(J+K+1)*(J-K+2)*(J-K+1));
+     U2 = 2.0*sqrt((2*J+1)*(2*J+5))*oddsign(M-K)*CJJ2M*CJJ2K/3.0;
+     U2 = numpy.concatenate((prep,U2))[0:(Jmax-1)];
+ 
+     req = ['C_CONTIGUOUS','ALIGNED'];
+     diag=numpy.require(diag,requirements=req);
+     U1=numpy.require(U1,requirements=req);
+     U2=numpy.require(U2,requirements=req);
+
+     if (Jmax>=2):
+         U = scipy.sparse.diags([diag,U1,U1,U2,U2],[0,-1,1,-2,2],[Jmax+1]*2);
+     elif (Jmax==1):
+         U = scipy.sparse.diags([diag,U1,U1],[0,-1,1],[Jmax+1]*2);
+     else:
+         U = diag;
+
      cache[(Jmax,K,M,KMsign)] = (U, diag, U1, U2);
      return (U, diag, U1, U2);
 
