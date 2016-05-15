@@ -26,7 +26,7 @@ import multiprocessing
 import sys,os
 
 
-def dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_cos2d,do_psi_pulse=False):
+def dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_cos2d,do_psi_pulse=False,verbose=True):
        
     if (t_end < 0):
         B = molecule.B;
@@ -42,45 +42,57 @@ def dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_
     dispatcher_started_time = time.time();
     with multiprocessing.Pool() as p:
 
+        num_total = len(states)*Nshells;
+        chunksize = max(1,int(num_total/multiprocessing.cpu_count()/10));
+
         asyncs = [];
         for state in states:
             boltzmann_weight,J,K,M,KMsign = state;
-            for n in range(Nshells):
-                asyncs.append(p.apply_async(trace_backend.cos2_trace,(J,K,M,KMsign,Jmax,molecule,focal_pulses[n],dt,t_end,calculate_cos2d,do_psi_pulse)));
+            args = [(J,K,M,KMsign,Jmax,molecule,focal_pulses[n],dt,t_end,calculate_cos2d,do_psi_pulse) for n in range(Nshells)];
+            asyncs.append(p.starmap_async(trace_backend.cos2_trace,args,chunksize));
 
         num = 0;
         for state in states:
             boltzmann_weight,J,K,M,KMsign = state;
-            print("Waiting for cos2 for J,K,M,KMsign = {:d},{:d},{:d},{:d}.".format(J,K,M,KMsign),file=sys.stderr);
+            if (verbose):
+                print("Waiting for cos2 for J,K,M,KMsign = {:d},{:d},{:d},{:d}.".format(J,K,M,KMsign),file=sys.stderr);
             cos2 = 0;
             cos2d = 0;
             begin = time.time()
+            map_result = asyncs.pop(0).get();
             for n in range(Nshells):
-                t,cos2_n,cos2d_n,psi_n = asyncs.pop(0).get();
+                t,cos2_n,cos2d_n,psi_n = map_result[n];
                 cos2 += focalvolume_weight[n]*cos2_n;
                 cos2d += focalvolume_weight[n]*cos2d_n;
             cos2s.append(boltzmann_weight*cos2);
             cos2ds.append(boltzmann_weight*cos2d);
             psis.append(psi_n);
-            num = num + 1;
-            timedelta = timedelta_round(datetime.timedelta(seconds=time.time()-begin),1);
-            print(("Time delta: "+timedelta).ljust(40) + "{:.1f}% done.".format(num/len(states)*100).rjust(40)  ,file=sys.stderr);
-
-    print("",file=sys.stderr);
-    timedelta = datetime.timedelta(seconds=time.time()-dispatcher_started_time);
-    timedelta = timedelta_round(timedelta,1);
-    print("Job completed in total time: "+timedelta,file=sys.stderr);
+            if (verbose):
+                num = num + 1
+                timedelta = timedelta_round(datetime.timedelta(seconds=time.time()-begin),1);
+                elapsed = time.time()-dispatcher_started_time;
+                tottime_estimate = round(elapsed/num*len(states));
+                elapsed = timedelta_round(datetime.timedelta(seconds=elapsed),0);
+                estimate = timedelta_round(datetime.timedelta(seconds=tottime_estimate),0);
+                print(("Time diff: "+timedelta + ".").ljust(25) +("Elapsed: " + elapsed + ' of '+estimate + " (est.)").ljust(35) + "{:.1f}% done.".format(num/len(states)*100).rjust(20)  ,file=sys.stderr);
 
     cos2 = numpy.array(cos2s);
     cos2 = numpy.sum(cos2,0);
     cos2d = numpy.array(cos2ds);
     cos2d = numpy.sum(cos2d,0);
 
+    if (verbose):
+        print("",file=sys.stderr);
+        timedelta = datetime.timedelta(seconds=time.time()-dispatcher_started_time);
+        timedelta = timedelta_round(timedelta,1);
+        print("Job completed in total time: "+timedelta,file=sys.stderr);
+
+
     return t,cos2,cos2d,psis
 
 def timedelta_round(td,digits):
     td = str(td).split(".");
-    if (len(td) > 1):
+    if (len(td) > 1 and digits>0):
         fraction = "{:.0f}".format(round(float(td[1])/1e6,digits)*10**digits)
         td = td[0]+"."+fraction;
     else:

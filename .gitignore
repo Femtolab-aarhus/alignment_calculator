@@ -2,3 +2,7 @@
 *.dat
 *.csv
 *.o
+*.so
+*.a
+*.swp
+__pycache__
