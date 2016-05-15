@@ -223,10 +223,27 @@ static int reduce_cos2dmat(int K, int M, size_t Jmax, size_t *dimm, const double
      return 0;
 }
 
-static inline void downscale(size_t dim, size_t jmax, unsigned int offset, double complex out[dim], double complex in[jmax+1]) {
+static inline void downscale(const size_t dim, const size_t jmax, const unsigned int offset, double complex out[dim], const double complex in[jmax+1]) {
      size_t i;
      for (i = 0; i < dim; i++) out[i] = in[2*i+offset];
 }
+/*
+static inline void upscale(const size_t dim, const size_t jmax, const unsigned int offset, double complex out[jmax+1], const double complex in[dim]) {
+     assert(offset==0 || offset==1);
+     assert(dim>0);
+     size_t i;
+     const unsigned int null_offset = 1-offset;
+
+     for (i = 0; i < dim-1; i++) {
+          out[2*i+offset] = in[i];
+          out[2*i+null_offset] = 0;
+     }
+     if (2*i+offset <= jmax)
+          out[2*i+offset] = in[i];
+     if (2*i+null_offset <= jmax)
+          out[2*i+null_offset] = 0;
+} */
+
 
 void fieldfree_propagation(int K, int M, const size_t Jmax, const double complex psi_0[Jmax+1], double t0, size_t num_times, const double times[num_times], const double E_rot[Jmax+1], const double Udiag[Jmax+1], const double Uband1[Jmax], const double Uband2[Jmax-1], double complex psi_result[num_times][Jmax+1], double cos2[num_times], const _Bool do_cos2d, const double U2d[Jmax+1][Jmax+1], double cos2d[num_times]) {
 
@@ -297,7 +314,7 @@ void fieldfree_propagation(int K, int M, const size_t Jmax, const double complex
                     // entry in psi is 0. This gives a fairly significant
                     // speedup
                     downscale(dim,Jmax,offset,psi_downscaled,psi_result[i]);
-                    matvec_nc(dim,(const double (*)[dim]) &U2d_reduced[0],U2d_psi,psi_downscaled);
+                    matvec_nc(dim,(const double (*)[dim]) U2d_reduced,U2d_psi,psi_downscaled);
                     cos2d[i] = creal(dot(dim,psi_downscaled,U2d_psi));
 
                }
@@ -349,57 +366,48 @@ struct deriv_params {
      int ncalls;
 };
 
-int deriv (double t, const double psi[], double dPsidt[], void * params) {
+int deriv (double t, const double _psi[], double _dPsidt[], void * params) {
      // Note: psi and dPsidt are complex, but GSL ode interface requires double.
-     // Index 2j is the j'th real component, and 2j+1 is the j'th imaginary
-     // component. This is a somewhat dangerous assumption that
-     // can depend on the compiler implementation. It holds for GCC.
+     // Here, we assume a complex is represented by two doubles
+     // (e.g. real+imag part, or magnitude and phase) and lie contigously in
+     // memory.
  
      struct deriv_params *p = params;
      size_t j;
      const size_t dim = p->dim;
-     // Gaussian pulse:
      double E_0_squared = pulse(t,p->peak_field_amplitude_squared,p->sigma_sq);
-     double tmp;
+     const double complex *psi = (const double complex *) _psi;
+     double complex *dPsidt = (double complex *) _dPsidt;
 
-     
      // Multiply the interaction term
-     fast2band(dim,p->V0,p->V1,p->V2,(double complex *) dPsidt, (const double complex *) psi);
+     fast2band(dim,p->V0,p->V1,p->V2, dPsidt, psi);
 
-     // Then add the diagonal and multiply every component with -i.
-     // I.e. -i*(a+ib) = b-ia.
      for (j = 0; j < dim; j++) {
-          dPsidt[2*j] = E_0_squared*dPsidt[2*j] + p->E_rot[j]*psi[2*j];
-          dPsidt[2*j+1] = E_0_squared*dPsidt[2*j+1] + p->E_rot[j]*psi[2*j+1];
-
-          // Multiplication by -i:
-          tmp = dPsidt[2*j+1]; // Imaginary part
-          dPsidt[2*j+1] = -dPsidt[2*j];
-          dPsidt[2*j]  = tmp; // becomes real part.
+          dPsidt[j] = -I*(E_0_squared*dPsidt[j] + p->E_rot[j]*psi[j]);
      }
 
      //p->ncalls++;
      return GSL_SUCCESS;
 }
 
-
-int propagate_field_ODE(size_t Nsteps, const size_t dim, double t, double dt, double E0_sq_max, double sigma, double complex psi_t[Nsteps][dim], const double V0[], const double V1[], const double V2[], const double E_rot[], double abstol, double reltol) {
+int propagate_field_ODE(size_t Nsteps, const size_t dim, double t, double dt, double E0_sq_max, double sigma, double complex psi_t[Nsteps][dim], const double V0[dim], const double V1[dim-1], const double V2[dim-2], const double E_rot[dim], double abstol, double reltol) {
 
      size_t i;
      struct deriv_params p = {dim,E0_sq_max,sigma*sigma,E_rot,V0,V1,V2,0};
-     gsl_odeiv2_system sys = {.function=deriv,.jacobian=NULL,\
-          .dimension=2*dim,.params=&p};
+     gsl_odeiv2_system sys = {.function=deriv, .jacobian=NULL, \
+                              .dimension=2*dim, .params=&p};
+     int basis_too_small = 0;
 
      double initial_step_size = min(2.4*sigma/150,1/E_rot[dim-1]/5.7); // 150 steps per pulse
+
      gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new (&sys, \
                gsl_odeiv2_step_rk8pd, initial_step_size, abstol,reltol);
                // rk8pd seems fastest. Did not try the methods
                // that rely on the Jacobian. d(dpsi/dt)/dpsi is diagonal,
                // but d(dpsi/dt)/dt is less trivial.
-               //gsl_odeiv2_step_rkck, initial_step_size, abstol,reltol);
-               //gsl_odeiv2_step_msadams, initial_step_size, abstol,reltol);
-               //gsl_odeiv2_step_rk2, initial_step_size, abstol,reltol);
-               //gsl_odeiv2_step_rkf45, initial_step_size, abstol,reltol);
+               // Other methods that are available:
+               //  gsl_odeiv2_step_rkck, gsl_odeiv2_step_msadams,
+               //  gsl_odeiv2_step_rk2, gsl_odeiv2_step_rkf45
 
      //gsl_odeiv2_driver_set_hmax(d,max step);
 
@@ -409,20 +417,22 @@ int propagate_field_ODE(size_t Nsteps, const size_t dim, double t, double dt, do
      
           memcpy(psi_t[i],psi_t[i-1],sizeof(double complex)*dim);
           gsl_odeiv2_driver_apply(d,&t_run,t+(double)i*dt,(double *) psi_t[i]);
-     
-          if (fmax(pow(cabs(psi_t[i][dim-2]),2),pow(cabs(psi_t[i][dim-1]),2)) > 1e-5) {
-               gsl_odeiv2_driver_free(d);
-               return 1; // Basis size too small
-          }
 
+          if (fmax(pow(cabs(psi_t[i][dim-2]),2),pow(cabs(psi_t[i][dim-1]),2)) > 1e-5) {
+               basis_too_small = 1;
+               break;
+          }
      }
 
      gsl_odeiv2_driver_free(d);
 
      //printf("ncalls: %i.\n",p.ncalls);
 
-     return 0;
+     return basis_too_small;
 }
+
+
+
 
 #endif
 

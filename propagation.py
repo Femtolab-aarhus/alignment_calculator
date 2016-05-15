@@ -237,6 +237,7 @@ def propagate_ODE(psi_0,time,E_rot,E_0_squared_max,sigma,V0,V1,V2,abstol=1e-8,re
          res = libpropagation.propagate_field_ODE(len(time),len(psi_0),time[0],dt,E_0_squared_max,sigma,psi_t,V0,V1,V2,E_rot, abstol, reltol);
      except:
          raise RuntimeError("For ODE propagation, you need the libpropagation C library, compiled with GSL support.");
+
      if (res != 0):
          raise RuntimeError("Basis size too small");
  
