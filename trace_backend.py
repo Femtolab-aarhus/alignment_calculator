@@ -42,6 +42,11 @@ def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,do_psi_p
     cos2d = [];
     psis = [];
 
+
+    U, U0, U1, U2 = interaction.MeanCos2Matrix(Jmax,K,M,KMsign)
+    if (do_cos2d):
+        U2d = U2dcalc.MeanCos2dMatrix(Jmax,K,M,KMsign);
+
     last_t = laserpulses[0].t-window*laserpulses[0].FWHM-max(1e-12,5*dt); # Start 1 ps before first pulse
 
     A = molecule.A;
@@ -79,9 +84,6 @@ def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,do_psi_p
         times.append(integration_time+t)
         cos2_pulse = numpy.empty((len(integration_time),))
         cos2d_pulse = numpy.empty((len(integration_time),))
-        U, U0, U1, U2 = interaction.MeanCos2Matrix(Jmax,K,M,KMsign)
-        if (do_cos2d):
-            U2d = U2dcalc.MeanCos2dMatrix(Jmax,K,M,KMsign);
         for i in range(len(integration_time)):
             psi = transfer[i,:];
             cos2_pulse[i] = numpy.real(numpy.conj(psi).dot(U.dot(psi)))

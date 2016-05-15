@@ -36,8 +36,12 @@
 
 #define ODD(n) ((n)&1) // n (un)signed integer
 
+static inline double pulse(double t, double amplitude, double sigma_sq) {
+     return amplitude*exp(-t*t/(2*sigma_sq));
+}
+
 // Fast matrix-vector multiplication when the matrix is symmetric 5-diagonal
-static void fast2band(const size_t N, const double diag[N], const double band1[N-1], const double band2[N-2], double complex out[N], const double complex in[N]) {
+static inline void fast2band(const size_t N, const double diag[N], const double band1[N-1], const double band2[N-2], double complex out[N], const double complex in[N]) {
 
      size_t i;
 
@@ -91,7 +95,7 @@ void fast1band(const size_t N, const double diag[N], const double band[N-1], dou
 
 
 // nc: no clobber, i.e. no overwriting of the input vector. 
-static void matvec_nc(const size_t N, const double mat[N][N], double complex out[N], const double complex vec[N]) {
+static inline void matvec_nc(const size_t N, const double mat[N][N], double complex out[N], const double complex vec[N]) {
 
      size_t i,j,k;
      // Do the matrix-vector operation num_rows matrix rows at a time.
@@ -130,7 +134,7 @@ static void matvec_nc(const size_t N, const double mat[N][N], double complex out
      }
 }
 
-static void matvec(size_t N, const double mat[N][N], double complex vec[N]) {
+static inline void matvec(size_t N, const double mat[N][N], double complex vec[N]) {
 
      double complex out[N];
      matvec_nc(N,mat,out,vec);
@@ -154,14 +158,14 @@ static void matTvec(size_t N, const double mat[N][N], double complex vec[N]) {
      memcpy(vec,out,N*sizeof(double complex));
 }*/
 
-static void vecvec(size_t N, double complex v1[N], const double complex v2[N]) {
+static inline void vecvec(size_t N, double complex v1[N], const double complex v2[N]) {
      size_t i;
      for (i = 0; i < N; i++) {
           v1[i] = v1[i]*v2[i];
      }
 }
 
-double complex dot(size_t N, const double complex a[N], const double complex b[N]) {
+static inline double complex dot(size_t N, const double complex a[N], const double complex b[N]) {
      complex double res;
      size_t i;
 
@@ -190,6 +194,9 @@ int detect_parity(size_t dim, const double complex psi[dim]) {
      return 0;
 }
 
+// Check if wave function has parity. If so, cut away every other
+// row and column of the U2d matrix, as those row/col won't contribute
+// in the calculation of <U2d>
 static int reduce_cos2dmat(int K, int M, size_t Jmax, size_t *dimm, const double complex psi_0[Jmax+1], void *buffer,const double U2d[Jmax+1][Jmax+1]) {
 
      size_t i,j;
@@ -276,29 +283,22 @@ void fieldfree_propagation(int K, int M, const size_t Jmax, const double complex
  
           //U_psi = U dot Psi
           fast2band(Jmax+1, Udiag,Uband1,Uband2, U_psi, psi_result[i]);
-
-          cos2[i] = 0;
-          for (J = 0; J <= Jmax; J++) { // calculate cos^2 = conj(psi)*U*psi
-               cos2[i] += conj(psi_result[i][J])*U_psi[J];
-          }
+          // calculate cos^2 = conj(psi)*U*psi:
+          cos2[i] = creal(dot(Jmax+1,psi_result[i],U_psi));
           
           // U2d_psi = U2d dot psi, if U2d is specified
           if (do_cos2d) {
-               cos2d[i] = 0;
                // U2d_psi = U2d dot psi
                if (parity == 0) {
                     matvec_nc(Jmax+1, U2d, U_psi, psi_result[i]);
-                    for (J = 0; J <= Jmax; J++)
-                         cos2d[i] += conj(psi_result[i][J])*U_psi[J];
+                    cos2d[i] = creal(dot(Jmax+1,psi_result[i],U_psi));
                } else {
                     // Use the downscaled U2d matrix because every other
                     // entry in psi is 0. This gives a fairly significant
                     // speedup
                     downscale(dim,Jmax,offset,psi_downscaled,psi_result[i]);
                     matvec_nc(dim,(const double (*)[dim]) &U2d_reduced[0],U2d_psi,psi_downscaled);
-                    for (J=0; J<dim; J++) {
-                         cos2d[i] += conj(psi_downscaled[J])*U2d_psi[J];
-                    }
+                    cos2d[i] = creal(dot(dim,psi_downscaled,U2d_psi));
 
                }
           }
@@ -323,7 +323,7 @@ int propagate_field(size_t Nsteps, size_t Nsteps_inner, size_t dim, double t, do
                     vecvec(dim,psi_t[i],expRot); // psi = expRot*psi;
                //matTvec(dim,eigvec,psi_t[i]); // psi = eigvec^T dot psi
                matvec(dim,eigvecT,psi_t[i]); // psi = eigvec^T dot psi
-               fac = -E0_sq_max*exp(-(t*t)/(2*sigma_sq))*dt;
+               fac = -pulse(t,E0_sq_max,sigma_sq)*dt;
                t = t + dt;
                for (j = 0; j < dim; j++) // psi = psi*exp(the diagonal)
                     psi_t[i][j] *= cexp(fac*eig[j]*I);
@@ -343,7 +343,7 @@ int propagate_field(size_t Nsteps, size_t Nsteps_inner, size_t dim, double t, do
 #ifndef NO_GSL
 struct deriv_params {
      size_t dim;
-     double peak_field_amplitude_squared, sigma;
+     double peak_field_amplitude_squared, sigma_sq;
      const double *E_rot;
      const double *V0, *V1, *V2;
      int ncalls;
@@ -359,8 +359,7 @@ int deriv (double t, const double psi[], double dPsidt[], void * params) {
      size_t j;
      const size_t dim = p->dim;
      // Gaussian pulse:
-     double E_0_squared = p->peak_field_amplitude_squared * \
-                          exp(-t*t/(2*(p->sigma)*(p->sigma)));
+     double E_0_squared = pulse(t,p->peak_field_amplitude_squared,p->sigma_sq);
      double tmp;
 
      
@@ -387,7 +386,7 @@ int deriv (double t, const double psi[], double dPsidt[], void * params) {
 int propagate_field_ODE(size_t Nsteps, const size_t dim, double t, double dt, double E0_sq_max, double sigma, double complex psi_t[Nsteps][dim], const double V0[], const double V1[], const double V2[], const double E_rot[], double abstol, double reltol) {
 
      size_t i;
-     struct deriv_params p = {dim,E0_sq_max,sigma,E_rot,V0,V1,V2,0};
+     struct deriv_params p = {dim,E0_sq_max,sigma*sigma,E_rot,V0,V1,V2,0};
      gsl_odeiv2_system sys = {.function=deriv,.jacobian=NULL,\
           .dimension=2*dim,.params=&p};
 
