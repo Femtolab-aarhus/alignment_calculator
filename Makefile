@@ -18,7 +18,10 @@ WARNINGS = -std=c11 -pedantic -Wall -Wextra -Wconversion -Wshadow -Wpointer-arit
 
 DEBUG = #-g
 
-CFLAGS = $(DEBUG) $(WARNINGS) -Wall -mtune=native -march=native -msse2 -pipe -fpic -Ofast -ffast-math -fassociative-math -funroll-loops -fuse-linker-plugin -frename-registers -fweb -fomit-frame-pointer -funswitch-loops -funsafe-math-optimizations -fno-common
+SSE = #-msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -msse4 -msse4a
+AVX = #-mavx -mavx2 -mavx512f -mavx512pf -mavx512er -mavx512cd
+
+CFLAGS = $(DEBUG) $(WARNINGS) -Wall -mtune=native -march=native $(SSE) $(AVX) -pipe -fpic -Ofast -ffast-math -fassociative-math -funroll-loops -fuse-linker-plugin -frename-registers -fweb -fomit-frame-pointer -funswitch-loops -funsafe-math-optimizations -fno-common
 
 OPENMP = -fopenmp # Comment out to remove openmp support
 DISABLE_GSL = # -DNO_GSL # Uncomment to remove code that depends on the GSL.
