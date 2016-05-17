@@ -16,13 +16,15 @@ WARNINGS = -std=c11 -pedantic -Wall -Wextra -Wconversion -Wshadow -Wpointer-arit
 
 # -fstack-protector-all  is useful for debugging.
 
-CFLAGS = $(WARNINGS) -Wall -mtune=native -march=native -msse2 -pipe -fpic -Ofast -ffast-math -fassociative-math -funroll-loops -fuse-linker-plugin -frename-registers -fweb -fomit-frame-pointer -funswitch-loops -funsafe-math-optimizations -fno-common
+DEBUG = #-g
+
+CFLAGS = $(DEBUG) $(WARNINGS) -Wall -mtune=native -march=native -msse2 -pipe -fpic -Ofast -ffast-math -fassociative-math -funroll-loops -fuse-linker-plugin -frename-registers -fweb -fomit-frame-pointer -funswitch-loops -funsafe-math-optimizations -fno-common
 
 OPENMP = -fopenmp # Comment out to remove openmp support
 DISABLE_GSL = # -DNO_GSL # Uncomment to remove code that depends on the GSL.
 # Also remove -lgslcblas and -lgsl from LDFLAGS.
 
-LDFLAGS = -lm -lgslcblas -lgsl 
+LDFLAGS = $(DEBUG) -lm -lgslcblas -lgsl 
 
 
 
@@ -37,7 +39,7 @@ libpropagation.so:	propagation.o
 	@echo 
 	@echo Making libpropagation.so
 	@echo 
-	$(CC) propagation.o $(LDFLAGS) -shared -Wl,-soname,libpropagation.so.1 -o libpropagation.so
+	$(CC) propagation.o $(LDFLAGS) -shared -Wl,-soname,libpropagation.so -o libpropagation.so
 
 libU2d.dll:	U2d.o wigner/libwigner.a
 	@echo 
@@ -52,7 +54,9 @@ libU2d.so:	U2d.o wigner/libwigner.a
 	$(CC) $(LDFLAGS) -shared -Wl,-soname,libU2d.so.1 U2d.o -lgfortranbegin -lgfortran -lwigner -L./wigner $(OPENMP) -o libU2d.so
 
 
-
+test_propagation: test_propagation.c propagation.c
+	cat propagation.c | sed 's/static//g' | sed 's/inline//g' > propagation_nostatic.c
+	$(CC) -pg $(DISABLE_GSL) $(filter-out -fomit-frame-pointer, $(CFLAGS)) $(LDFLAGS) -o test_propagation test_propagation.c
 
 
 propagation.o: propagation.c
@@ -66,7 +70,7 @@ U2d.o: U2d.c
 
 
 clean:
-	rm -f *.o libpropagation.so libU2d.so
+	rm -f *.o libpropagation.so libU2d.so test_propagation propagation_nostatic.c
 	(cd wigner && $(MAKE) clean)
 
 

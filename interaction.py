@@ -112,7 +112,7 @@ def MeanCos2Matrix(Jmax,K,M,KMsign):
      Jmin = max(K,M);
 
      prep = numpy.zeros(Jmin);
-     J = numpy.arange(Jmin,Jmax+1);
+     J = numpy.arange(Jmin,Jmax+1,dtype=numpy.double);
 
      # Wigner 3J symbols: CJJxM=(J J+x 2; M -M 0), see Zare p. 63
      CJJM = oddsign(J-M) * A2array[2*J+3]*2*(3*M*M-J*(J+1));
@@ -121,10 +121,13 @@ def MeanCos2Matrix(Jmax,K,M,KMsign):
      diag = numpy.concatenate((prep,diag))[0:(Jmax+1)];
 
      J = J[:-1];
-     CJJ1M=oddsign(J+M+1)*A2array[2*J+4]*2.0*M*sqrt(6*(J-M+1)*(J+M+1));
-     CJJ1K=oddsign(J+K+1)*A2array[2*J+4]*2.0*K*sqrt(6*(J-K+1)*(J+K+1));
-     U1 = 2.0*sqrt((2*J+1)*(2*J+3))*oddsign(M-K)*CJJ1M*CJJ1K*KMsign/3.0;
-     U1 = numpy.concatenate((prep,U1))[0:Jmax];
+     if (K*M != 0):
+         CJJ1M=oddsign(J+M+1)*A2array[2*J+4]*2.0*M*sqrt(6*(J-M+1)*(J+M+1));
+         CJJ1K=oddsign(J+K+1)*A2array[2*J+4]*2.0*K*sqrt(6*(J-K+1)*(J+K+1));
+         U1 = 2.0*sqrt((2*J+1)*(2*J+3))*oddsign(M-K)*CJJ1M*CJJ1K*KMsign/3.0;
+         U1 = numpy.concatenate((prep,U1))[0:Jmax];
+     else:
+         U1 = numpy.zeros(Jmax);
 
      J = J[:-1];
      CJJ2M=oddsign(J+M)*A2array[2*J+5]*sqrt(6*(J+M+2)*(J+M+1)*(J-M+2)*(J-M+1));
@@ -138,7 +141,11 @@ def MeanCos2Matrix(Jmax,K,M,KMsign):
      U2=numpy.require(U2,requirements=req);
 
      if (Jmax>=2):
-         U = scipy.sparse.diags([diag,U1,U1,U2,U2],[0,-1,1,-2,2],[Jmax+1]*2);
+         if (K*M != 0):
+             U = scipy.sparse.diags([diag,U1,U1,U2,U2],[0,-1,1,-2,2],[Jmax+1]*2);
+         else:
+             U = scipy.sparse.diags([diag,U2,U2],[0,-2,2],[Jmax+1]*2);
+
      elif (Jmax==1):
          U = scipy.sparse.diags([diag,U1,U1],[0,-1,1],[Jmax+1]*2);
      else:

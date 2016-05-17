@@ -6,3 +6,8 @@
 *.a
 *.swp
 __pycache__
+propagation_nostatic.c
+gmon.out
+*.profile
+test_propagation
+
