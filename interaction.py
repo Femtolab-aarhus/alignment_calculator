@@ -92,11 +92,6 @@ def interaction_matrix_div_E0_squared(Jmax,K,M,KMsign,delta_alpha,alpha_perp,dia
 def MeanCos2Matrix(Jmax,K,M,KMsign):
      ''' Calculate <JKM|cos^2(theta)|J'KM>. '''
      
-     Jmax = int(Jmax); # Avoids some overflow issues where e.g. Jmax is an int32
-     K = int(K);
-     M = int(M);
-     KMsign = int(KMsign);
-
      try:
          cache = MeanCos2Matrix.cache;
      except AttributeError:
@@ -112,27 +107,27 @@ def MeanCos2Matrix(Jmax,K,M,KMsign):
      Jmin = max(K,M);
 
      prep = numpy.zeros(Jmin);
-     J = numpy.arange(Jmin,Jmax+1,dtype=numpy.double);
+     J = numpy.arange(Jmin,Jmax+1,dtype=numpy.int64);
 
      # Wigner 3J symbols: CJJxM=(J J+x 2; M -M 0), see Zare p. 63
-     CJJM = oddsign(J-M) * A2array[2*J+3]*2*(3*M*M-J*(J+1));
-     CJJK = oddsign(J-K) * A2array[2*J+3]*2*(3*K*K-J*(J+1));
-     diag = (2.0*(2*J+1)*oddsign(M-K)*CJJM*CJJK + 1.0)/3.0;
+     CJJM = oddsign(J-M) * A2array[2*J+3]*2*(3.*M*M-J*(J+1.));
+     CJJK = oddsign(J-K) * A2array[2*J+3]*2*(3.*K*K-J*(J+1.));
+     diag = (2.0*(2.*J+1.)*oddsign(M-K)*CJJM*CJJK + 1.0)/3.0;
      diag = numpy.concatenate((prep,diag))[0:(Jmax+1)];
 
      J = J[:-1];
      if (K*M != 0):
-         CJJ1M=oddsign(J+M+1)*A2array[2*J+4]*2.0*M*sqrt(6*(J-M+1)*(J+M+1));
-         CJJ1K=oddsign(J+K+1)*A2array[2*J+4]*2.0*K*sqrt(6*(J-K+1)*(J+K+1));
-         U1 = 2.0*sqrt((2*J+1)*(2*J+3))*oddsign(M-K)*CJJ1M*CJJ1K*KMsign/3.0;
+         CJJ1M=oddsign(J+M+1)*A2array[2*J+4]*2.0*M*sqrt(6.*(J-M+1.)*(J+M+1.));
+         CJJ1K=oddsign(J+K+1)*A2array[2*J+4]*2.0*K*sqrt(6.*(J-K+1.)*(J+K+1.));
+         U1 = 2.0*sqrt((2.*J+1.)*(2.*J+3.))*oddsign(M-K)*CJJ1M*CJJ1K*KMsign/3.;
          U1 = numpy.concatenate((prep,U1))[0:Jmax];
      else:
          U1 = numpy.zeros(Jmax);
 
      J = J[:-1];
-     CJJ2M=oddsign(J+M)*A2array[2*J+5]*sqrt(6*(J+M+2)*(J+M+1)*(J-M+2)*(J-M+1));
-     CJJ2K=oddsign(J+K)*A2array[2*J+5]*sqrt(6*(J+K+2)*(J+K+1)*(J-K+2)*(J-K+1));
-     U2 = 2.0*sqrt((2*J+1)*(2*J+5))*oddsign(M-K)*CJJ2M*CJJ2K/3.0;
+     CJJ2M=oddsign(J+M)*A2array[2*J+5]*sqrt(6.*(J+M+2.)*(J+M+1.)*(J-M+2.)*(J-M+1.));
+     CJJ2K=oddsign(J+K)*A2array[2*J+5]*sqrt(6.*(J+K+2.)*(J+K+1.)*(J-K+2.)*(J-K+1.));
+     U2 = 2.0*sqrt((2.*J+1.)*(2.*J+5.))*oddsign(M-K)*CJJ2M*CJJ2K/3.0;
      U2 = numpy.concatenate((prep,U2))[0:(Jmax-1)];
  
      req = ['C_CONTIGUOUS','ALIGNED'];
