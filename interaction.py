@@ -102,6 +102,9 @@ def MeanCos2Matrix(Jmax,K,M,KMsign):
      except KeyError:
          pass;
 
+     if (abs(KMsign) != 1):
+         print(KMsign)
+         raise RuntimeError("KMsign must be either 1 or -1");
 
      A2array = numpy.array([A2(i) for i in range(2*(Jmax+1)+6)]);
      Jmin = max(K,M);
