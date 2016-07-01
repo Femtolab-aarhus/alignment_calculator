@@ -45,6 +45,7 @@ class molecule(object):
                 # becomes exp(-iB*j*(j+1)*dt)
           s.alpha_par_volume = parser.getfloat(s.name,"alpha_par_volume");
           s.alpha_perp_volume = parser.getfloat(s.name,"alpha_perp_volume");
+          s.delta_alpha = s.alpha_par_volume - s.alpha_perp_volume;
           s.even = parser.getfloat(s.name,"even");
           s.odd = parser.getfloat(s.name,"odd");
      
