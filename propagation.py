@@ -118,8 +118,7 @@ def transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=True,
      '''
      A = molecule.A;
      B = molecule.B;
-     alpha_perp = molecule.alpha_perp_volume;
-     delta_alpha = molecule.alpha_par_volume-alpha_perp;
+     delta_alpha = molecule.delta_alpha;
      
      hbar=1.05457173e-34;
      c = 299792458.0;

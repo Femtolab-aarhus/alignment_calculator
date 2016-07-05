@@ -38,7 +38,7 @@ try:
 
     try: # May not be implemented.
         U2dlib.expand_U2d.restype = None;
-        U2dlib.expand_U2d.argtypes = (ct.c_int,real_ndptr);
+        U2dlib.expand_U2d.argtypes = (ct.c_int,ct.c_int,real_ndptr);
     except:
         pass;
 
@@ -168,7 +168,7 @@ def actually_calculate_U2d(Jmax,K,M,KMsign):
         lmax = 100; # min(100,2*Jmax); logic error if first call jmax=2, second jmax=200
         expansion_coefficients = numpy.empty(lmax+1);
         try:
-            U2dlib.expand_U2d(lmax,expansion_coefficients);
+            U2dlib.expand_U2d(lmax,0,expansion_coefficients);
         except AttributeError:
             # that required Gnu Scientific Library. If that was not
             # found, calculate them slowly using python

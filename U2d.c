@@ -27,10 +27,12 @@
 
 #include <math.h>
 
+#ifndef M_PI
 #define M_PI 3.14159265358979323846
+#endif
 
-#define max(a,b) (a > b) ? a : b
-#define min(a,b) (a < b) ? a : b
+#define max(a,b) ((a > b) ? a : b)
+#define min(a,b) ((a < b) ? a : b)
 
 // This library can be compiled without any GSL dependences.
 // If you do this, define NO_GSL. The expand_U2d function
@@ -67,7 +69,7 @@ static double integrand_wrap(double psi, void *params) {
 struct inner_params {
      gsl_function integrand;
      gsl_integration_workspace *workspace;
-     int l;
+     int l,m;
      size_t limit;
 };
 
@@ -81,10 +83,11 @@ static double inner(double u, void *params) {
      ip->u = u;
      gsl_integration_qag(&(p->integrand),0.0,2*M_PI,abstol,reltol,p->limit,GSL_INTEG_GAUSS61,p->workspace,&result,&abserr);
 
-     return result*gsl_sf_legendre_sphPlm(p->l, 0, u);
+     return result*gsl_sf_legendre_sphPlm(p->l, p->m, u);
 }
 
-static double outer(int l, gsl_integration_workspace *ws_in, gsl_integration_workspace *ws_out, size_t limit) {
+// Evaluate the iterated integral outer(inner(integrand(...)))
+static double outer(int l, int m, gsl_integration_workspace *ws_in, gsl_integration_workspace *ws_out, size_t limit) {
 
      double res, abserr;
      const double abstol = 1e-13, reltol = 1e-13; 
@@ -95,7 +98,7 @@ static double outer(int l, gsl_integration_workspace *ws_in, gsl_integration_wor
      inner_F.params = &inner_params;
 
      F.function = &inner;
-     struct inner_params params = {.integrand=inner_F,.workspace=ws_in,.l=l,.limit=limit};
+     struct inner_params params = {.integrand=inner_F,.workspace=ws_in,.l=l,.m=m,.limit=limit};
      F.params = &params;
 
      gsl_integration_qag(&F, -1.0, 1.0, abstol, reltol, limit, GSL_INTEG_GAUSS61, ws_out, &res, &abserr);
@@ -105,7 +108,7 @@ static double outer(int l, gsl_integration_workspace *ws_in, gsl_integration_wor
 }
 
 // Calculate relevant expansion coefficients by numerical integration
-void expand_U2d(int lmax, double coeff[lmax+1]) {
+void expand_U2d(int lmax, int m, double coeff[lmax+1]) {
 
      const size_t limit = 409600;
      int l;
@@ -123,7 +126,7 @@ void expand_U2d(int lmax, double coeff[lmax+1]) {
      #pragma omp for schedule(guided,4)
      for (l=0; l<=lmax; l+=2) { // cos^2 theta 2d is even. Change to +=1 if 
                                 // you want to expand something else.
-          coeff[l] = outer(l,inner_workspace,workspace,limit);
+          coeff[l] = outer(l,m,inner_workspace,workspace,limit);
           //printf("%i: %e\n",l,coeff[l]);
           //printf("l = %i, ",l);
           //fflush(stdout);
@@ -155,12 +158,13 @@ int drc3jj(int l2, int l3, int m2, int m3, int *l1min, int *l1max, double *thrco
 
 
 
-// Calculate the matrix elements. Coeff are the expansion coefficients.
+// Calculate the matrix elements. Coeff are the expansion coefficients, as
+// calculated by expand_U2d()
 void populate_U2d(const int lmax, const int k, const int m, const int lppmax, double coeff[lppmax+1], double U2d[lmax+1][lmax+1]) {
 
      int l,lp,lpp;
-     double w3jk[2*lmax+1];
-     double w3jm[2*lmax+1];
+     double w3jk[2*lmax+1]; // Wigner 3j symbols for the K bracket
+     double w3jm[2*lmax+1]; // Wigner 3j symbols for the M bracket
      double fac;
      int lppmin, lppmax_;
 
