@@ -54,7 +54,7 @@ libU2d.so:	U2d.o wigner/libwigner.a
 	@echo 
 	@echo Making U2d \(cos^2 theta 2d matrix\) library
 	@echo 
-	$(CC) $(LDFLAGS) -shared -Wl,-soname,libU2d.so.1 U2d.o -lgfortranbegin -lgfortran -lwigner -L./wigner $(OPENMP) -o libU2d.so
+	$(CC) $(LDFLAGS) -shared -Wl,-soname,libU2d.so.1 U2d.o -lgfortran -lwigner -L./wigner $(OPENMP) -o libU2d.so
 
 
 test_propagation: test_propagation.c propagation.c
