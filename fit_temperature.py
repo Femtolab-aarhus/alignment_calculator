@@ -22,10 +22,13 @@
 # It can be done faster without interpolation by only propagating directly
 # to the data points. That's just a bit more cumbersome..
 
-import sys
+# If you want to use this script, understand it, work on a copy of it
+# and remove the following notice:
+
 print("You must edit this file before you use it!",file=sys.stderr)
 # it is also a very good idea to run precalculate_matrix_elements.py before
 # optimizing the temperature.
+import sys
 sys.exit(1)
 
 import config
