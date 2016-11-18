@@ -140,13 +140,16 @@ def transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=True,
      if (not can_propagate_using_ODE):
          use_ODE = False;
 
+     # If we don't propagate with the ODE method, instead
+     # a matrix method is used. This method relies
+     # on the diagonalized interaction matrix.
      if (not use_ODE or Jmax<=2):
         V0, V1, V2, eig, vec = interaction.interaction_matrix_div_E0_squared(Jmax,K,M,KMsign,delta_alpha,alpha_perp,diagonalize=True);
         # Divide by hbar for solver
         eig = eig*4*pi*1e-30/hbar
         psi_t = propagate(psi,t,E_rot,E_0_squared_max,sigma,eig,vec);
      else:
-        V0, V1, V2, = interaction.interaction_matrix_div_E0_squared(Jmax,K,M,KMsign,delta_alpha,alpha_perp,diagonalize=False);
+        V0, V1, V2 = interaction.interaction_matrix_div_E0_squared(Jmax,K,M,KMsign,delta_alpha,alpha_perp,diagonalize=False);
         V0 = V0*4*pi*1e-30/hbar; # Divide by hbar for solver
         V1 = V1*4*pi*1e-30/hbar;
         V2 = V2*4*pi*1e-30/hbar;

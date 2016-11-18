@@ -25,6 +25,12 @@ import sys
 
 def thermal_JKM_ensemble(T,molecule,Jmax,percentile=0.999,anisotropy=1.0):
  
+    # Returns a list of 5-tuples for each state in the ensemble.
+    # Each tuple contains the weight, J, |K|, |M| and sign(KM).
+    # The states with e.g. negative M give the same 
+    # alignment trace as those with positive M (for K=0)
+    # so only the positive M are chosen, and the weight is adjusted
+    # accordingly.
 
     A = molecule.A;
     B = molecule.B;
@@ -33,7 +39,8 @@ def thermal_JKM_ensemble(T,molecule,Jmax,percentile=0.999,anisotropy=1.0):
         if (molecule.even != 0):
             return [(1,0,0,0,1)];
         else:
-            if (A != 0 and A-B < 0):
+            if (A != 0 and A-B < 0): # oblate top, K states energetically
+                                     # favorable to M states.
                 K = 1;
                 w = 1/3.0;
                 return [(w,1,K,0,1),(w,1,K,1,1),(w,1,K,1,-1)];
