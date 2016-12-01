@@ -404,7 +404,18 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
             plt.ylabel('J');
             plt.ion();
             fig.show();
-
+        if ('psi' in npzfile.keys()):
+            plt.ioff();
+            fig = plt.figure();
+            psi_pulse = npzfile["psi"];
+            
+            psi_final = psi_pulse[-1];
+            plt.title('Final state distribution');
+            plt.bar(numpy.arange(0,len(psi_final))-0.5,numpy.abs(psi_final)**2);
+            plt.xlabel('J')
+            plt.ylabel('Probability');
+            plt.ion();
+            plt.show();
 
     def saveTrace(self,checked):
         #diag = QFileDialog.getSaveFileName(self, "Select destination", "./", "Comma Separated Values (*.csv)");

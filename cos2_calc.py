@@ -121,7 +121,7 @@ if __name__ == "__main__":
 
     if (not store_csv):
      if (do_psi_pulse):
-        numpy.savez(filename,t=t,cos2=cos2,cos2d=cos2d,Javg=Javg,std=std,percentile_999=percentile_999);
+        numpy.savez(filename,t=t,cos2=cos2,cos2d=cos2d,Javg=Javg,std=std,percentile_999=percentile_999,psi=psi_pulse);
      else:
         numpy.savez(filename,t=t,cos2=cos2,cos2d=cos2d);
     else:
