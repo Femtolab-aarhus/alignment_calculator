@@ -27,7 +27,7 @@ OPENMP = -fopenmp # Comment out to remove openmp support
 DISABLE_GSL = # -DNO_GSL # Uncomment to remove code that depends on the GSL.
 # Also remove -lgslcblas and -lgsl from LDFLAGS.
 
-LDFLAGS = $(DEBUG) -lm -lgslcblas -lgsl 
+LDFLAGS = $(DEBUG) -lgsl -lgslcblas -lm
 
 
 
@@ -54,7 +54,7 @@ libU2d.so:	U2d.o wigner/libwigner.a
 	@echo 
 	@echo Making U2d \(cos^2 theta 2d matrix\) library
 	@echo 
-	$(CC) $(LDFLAGS) -shared -Wl,-soname,libU2d.so.1 U2d.o -lgfortran -lwigner -L./wigner $(OPENMP) -o libU2d.so
+	$(CC) U2d.o $(OPENMP) $(LDFLAGS) -shared -Wl,-soname,libU2d.so.1 -lwigner -L./wigner -lgfortran -o libU2d.so
 
 
 test_propagation: test_propagation.c propagation.c
