@@ -27,7 +27,10 @@ OPENMP = -fopenmp # Comment out to remove openmp support
 DISABLE_GSL = # -DNO_GSL # Uncomment to remove code that depends on the GSL.
 # Also remove -lgslcblas and -lgsl from LDFLAGS.
 
-LDFLAGS = $(DEBUG) -lgsl -lgslcblas -lm
+BLAS = -lgslcblas
+#BLAS = -lblas  # Use another, possibly faster BLAS implementation
+
+LDFLAGS = $(DEBUG) -lgsl $(BLAS) -lm
 
 
 
