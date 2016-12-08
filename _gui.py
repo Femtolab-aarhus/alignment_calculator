@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file 'GUI.ui'
 #
-# Created: Thu May 12 15:18:47 2016
-#      by: PyQt5 UI code generator 5.3.2
+# Created by: PyQt5 UI code generator 5.7
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -24,6 +23,8 @@ class Ui_MainWindow(object):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
+        MainWindow.setStyleSheet("font-family: \"Sans Serif\";\n"
+"font-size: 9pt;")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.mybutn = QtWidgets.QPushButton(self.centralwidget)
@@ -59,6 +60,8 @@ class Ui_MainWindow(object):
         font.setBold(True)
         font.setWeight(75)
         self.label_7.setFont(font)
+        self.label_7.setStyleSheet("font-weight: bold;\n"
+"font-size: 12pt;")
         self.label_7.setObjectName("label_7")
         self.label_8 = QtWidgets.QLabel(self.frame)
         self.label_8.setGeometry(QtCore.QRect(10, 50, 16, 16))
@@ -67,6 +70,8 @@ class Ui_MainWindow(object):
         font.setBold(True)
         font.setWeight(75)
         self.label_8.setFont(font)
+        self.label_8.setStyleSheet("font-weight: bold;\n"
+"font-size: 12pt;")
         self.label_8.setObjectName("label_8")
         self.label_9 = QtWidgets.QLabel(self.frame)
         self.label_9.setGeometry(QtCore.QRect(180, 30, 31, 16))
@@ -88,12 +93,14 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(12)
         self.label_11.setFont(font)
+        self.label_11.setStyleSheet("font-size: 12pt;")
         self.label_11.setObjectName("label_11")
         self.label_16 = QtWidgets.QLabel(self.frame)
         self.label_16.setGeometry(QtCore.QRect(10, 80, 171, 16))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.label_16.setFont(font)
+        self.label_16.setStyleSheet("font-size: 12pt;")
         self.label_16.setObjectName("label_16")
         self.alpha_par = QtWidgets.QLineEdit(self.frame)
         self.alpha_par.setGeometry(QtCore.QRect(90, 100, 71, 20))
@@ -123,6 +130,8 @@ class Ui_MainWindow(object):
         font.setBold(True)
         font.setWeight(75)
         self.label_25.setFont(font)
+        self.label_25.setStyleSheet("font-weight: bold;\n"
+"font-size: 12pt;")
         self.label_25.setObjectName("label_25")
         self.label_26 = QtWidgets.QLabel(self.frame)
         self.label_26.setGeometry(QtCore.QRect(10, 100, 61, 20))
@@ -131,6 +140,8 @@ class Ui_MainWindow(object):
         font.setBold(True)
         font.setWeight(75)
         self.label_26.setFont(font)
+        self.label_26.setStyleSheet("font-weight: bold;\n"
+"font-size: 12pt;")
         self.label_26.setObjectName("label_26")
         self.label_27 = QtWidgets.QLabel(self.frame)
         self.label_27.setGeometry(QtCore.QRect(10, 140, 41, 21))
@@ -139,14 +150,19 @@ class Ui_MainWindow(object):
         font.setBold(True)
         font.setWeight(75)
         self.label_27.setFont(font)
+        self.label_27.setStyleSheet("font-weight: bold;\n"
+"font-size: 12pt;")
         self.label_27.setObjectName("label_27")
         self.deltaAlpha = QtWidgets.QLabel(self.frame)
         self.deltaAlpha.setGeometry(QtCore.QRect(90, 140, 71, 21))
         font = QtGui.QFont()
-        font.setPointSize(11)
+        font.setFamily("Sans Serif")
+        font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
         self.deltaAlpha.setFont(font)
+        self.deltaAlpha.setStyleSheet("font-size: 12pt;\n"
+"font-weight: bold;")
         self.deltaAlpha.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.deltaAlpha.setObjectName("deltaAlpha")
         self.label_29 = QtWidgets.QLabel(self.frame)
@@ -260,6 +276,8 @@ class Ui_MainWindow(object):
         font.setBold(True)
         font.setWeight(75)
         self.label_34.setFont(font)
+        self.label_34.setStyleSheet("font-weight: bold;\n"
+"font-size: 18pt;")
         self.label_34.setObjectName("label_34")
         self.label_35 = QtWidgets.QLabel(self.singleState)
         self.label_35.setGeometry(QtCore.QRect(56, 38, 21, 41))
@@ -268,6 +286,8 @@ class Ui_MainWindow(object):
         font.setBold(True)
         font.setWeight(75)
         self.label_35.setFont(font)
+        self.label_35.setStyleSheet("font-weight: bold;\n"
+"font-size: 18pt;")
         self.label_35.setObjectName("label_35")
         self.label_36 = QtWidgets.QLabel(self.singleState)
         self.label_36.setGeometry(QtCore.QRect(237, 38, 21, 41))
@@ -276,6 +296,8 @@ class Ui_MainWindow(object):
         font.setBold(True)
         font.setWeight(75)
         self.label_36.setFont(font)
+        self.label_36.setStyleSheet("font-weight: bold;\n"
+"font-size: 18pt;")
         self.label_36.setObjectName("label_36")
         self.label_42 = QtWidgets.QLabel(self.singleState)
         self.label_42.setGeometry(QtCore.QRect(10, 80, 281, 50))
@@ -382,9 +404,11 @@ class Ui_MainWindow(object):
         self.label_37 = QtWidgets.QLabel(self.centralwidget)
         self.label_37.setGeometry(QtCore.QRect(240, 248, 271, 16))
         font = QtGui.QFont()
-        font.setPointSize(6)
+        font.setFamily("Sans Serif")
+        font.setPointSize(7)
         self.label_37.setFont(font)
         self.label_37.setStatusTip("")
+        self.label_37.setStyleSheet("font-size: 7pt;")
         self.label_37.setObjectName("label_37")
         self.frame_3 = QtWidgets.QFrame(self.centralwidget)
         self.frame_3.setGeometry(QtCore.QRect(340, 290, 171, 171))
@@ -398,6 +422,8 @@ class Ui_MainWindow(object):
         font.setBold(True)
         font.setWeight(75)
         self.label_39.setFont(font)
+        self.label_39.setStyleSheet("font-size: 12pt;\n"
+"font-weight: bold;")
         self.label_39.setObjectName("label_39")
         self.Jmax = QtWidgets.QLineEdit(self.frame_3)
         self.Jmax.setGeometry(QtCore.QRect(100, 10, 41, 20))
@@ -457,7 +483,7 @@ class Ui_MainWindow(object):
         self.label_28.setObjectName("label_28")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 517, 19))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 517, 24))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")

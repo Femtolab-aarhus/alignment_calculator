@@ -39,6 +39,10 @@
    <iconset>
     <normaloff>icon.png</normaloff>icon.png</iconset>
   </property>
+  <property name="styleSheet">
+   <string notr="true">font-family: &quot;Sans Serif&quot;;
+font-size: 9pt;</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QPushButton" name="mybutn">
     <property name="geometry">
@@ -167,6 +171,10 @@
      <property name="statusTip">
       <string>Linear molecules have A=0</string>
      </property>
+     <property name="styleSheet">
+      <string notr="true">font-weight: bold;
+font-size: 12pt;</string>
+     </property>
      <property name="text">
       <string>A</string>
      </property>
@@ -189,6 +197,10 @@
      </property>
      <property name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Main rotational constant.&lt;/p&gt;&lt;p&gt;This rotational constant corresponds to the two identical moments of inertia in a principal frame.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font-weight: bold;
+font-size: 12pt;</string>
      </property>
      <property name="text">
       <string>B</string>
@@ -271,6 +283,9 @@
        <pointsize>12</pointsize>
       </font>
      </property>
+     <property name="styleSheet">
+      <string notr="true">font-size: 12pt;</string>
+     </property>
      <property name="text">
       <string>Rotational constants</string>
      </property>
@@ -288,6 +303,9 @@
       <font>
        <pointsize>12</pointsize>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font-size: 12pt;</string>
      </property>
      <property name="text">
       <string>Polarizability tensor</string>
@@ -391,6 +409,10 @@
      <property name="toolTip">
       <string>Polarizability volume perpendicular to the main molecular axis</string>
      </property>
+     <property name="styleSheet">
+      <string notr="true">font-weight: bold;
+font-size: 12pt;</string>
+     </property>
      <property name="text">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;α&lt;span style=&quot; vertical-align:sub;&quot;&gt;&amp;perp;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
@@ -413,6 +435,10 @@
      </property>
      <property name="toolTip">
       <string>Polarizability volume along main molecular axis</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font-weight: bold;
+font-size: 12pt;</string>
      </property>
      <property name="text">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;α&lt;/span&gt;&lt;span style=&quot; font-size:12pt; vertical-align:sub;&quot;&gt;∥&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -437,6 +463,10 @@
      <property name="toolTip">
       <string>Polarizability volume anisotropy</string>
      </property>
+     <property name="styleSheet">
+      <string notr="true">font-weight: bold;
+font-size: 12pt;</string>
+     </property>
      <property name="text">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Δα&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
@@ -452,13 +482,18 @@
      </property>
      <property name="font">
       <font>
-       <pointsize>11</pointsize>
+       <family>Sans Serif</family>
+       <pointsize>12</pointsize>
        <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
      <property name="toolTip">
       <string>Polarizability volume anisotropy</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font-size: 12pt;
+font-weight: bold;</string>
      </property>
      <property name="text">
       <string>0</string>
@@ -903,6 +938,10 @@
         <bold>true</bold>
        </font>
       </property>
+      <property name="styleSheet">
+       <string notr="true">font-weight: bold;
+font-size: 18pt;</string>
+      </property>
       <property name="text">
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;|JKM&amp;gt; = &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
@@ -923,6 +962,10 @@
         <bold>true</bold>
        </font>
       </property>
+      <property name="styleSheet">
+       <string notr="true">font-weight: bold;
+font-size: 18pt;</string>
+      </property>
       <property name="text">
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;|&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
@@ -942,6 +985,10 @@
         <weight>75</weight>
         <bold>true</bold>
        </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font-weight: bold;
+font-size: 18pt;</string>
       </property>
       <property name="text">
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&amp;gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1408,7 +1455,8 @@
     </property>
     <property name="font">
      <font>
-      <pointsize>6</pointsize>
+      <family>Sans Serif</family>
+      <pointsize>7</pointsize>
      </font>
     </property>
     <property name="toolTip">
@@ -1416,6 +1464,9 @@
     </property>
     <property name="statusTip">
      <string/>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font-size: 7pt;</string>
     </property>
     <property name="text">
      <string>For multiple pulses, separate t0 with comma</string>
@@ -1454,6 +1505,10 @@
      </property>
      <property name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The lower, the faster the calculation. If too low, the result will be incorrect.&lt;/p&gt;&lt;p&gt;The optimal value depends on the laser pulse and the molecule in question.&lt;/p&gt;&lt;p&gt;Tip: for adiabatic alignment, Jmax can be really low.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font-size: 12pt;
+font-weight: bold;</string>
      </property>
      <property name="text">
       <string>Jmax =</string>
@@ -1696,7 +1751,7 @@
      <x>0</x>
      <y>0</y>
      <width>517</width>
-     <height>19</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

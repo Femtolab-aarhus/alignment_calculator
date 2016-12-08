@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>About</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">font-family: &quot;Sans Serif&quot;;
+font-size: 9pt;</string>
+  </property>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>

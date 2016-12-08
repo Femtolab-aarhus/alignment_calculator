@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file 'aboutForm.ui'
 #
-# Created: Wed May 11 09:14:47 2016
-#      by: PyQt5 UI code generator 5.3.2
+# Created by: PyQt5 UI code generator 5.7
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -13,6 +12,8 @@ class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(504, 254)
+        Form.setStyleSheet("font-family: \"Sans Serif\";\n"
+"font-size: 9pt;")
         self.label = QtWidgets.QLabel(Form)
         self.label.setGeometry(QtCore.QRect(12, 10, 120, 90))
         self.label.setObjectName("label")
