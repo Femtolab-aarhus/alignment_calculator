@@ -1566,7 +1566,7 @@ font-weight: bold;</string>
       <rect>
        <x>10</x>
        <y>149</y>
-       <width>51</width>
+       <width>61</width>
        <height>19</height>
       </rect>
      </property>
@@ -1588,7 +1588,7 @@ font-weight: bold;</string>
       <rect>
        <x>100</x>
        <y>149</y>
-       <width>61</width>
+       <width>71</width>
        <height>19</height>
       </rect>
      </property>
