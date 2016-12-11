@@ -42,6 +42,8 @@ def save_to_csv(filename,t,cos2,cos2d,extra_headers=[],extra_columns=[],delimite
 
 def running_on_windows():
     return platform.system().lower().startswith('win');
+def running_on_mac():
+    return platform.system().lower().startswith('darwin');
 
 def nice_time_step(B,Jmax,for_cos2d=False):
     ''' Chooses a nice time step based on the molecule and basis size '''
