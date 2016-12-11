@@ -1,5 +1,6 @@
 
-all:	libpropagation.so libU2d.so  # For POSIX
+all:	libpropagation.so libU2d.so  # For Linux/BSD
+#all:	libpropagation.dynlib libU2d.dynlib  # For Darwin (Mac)
 #all:	libpropagation.dll libU2d.dll  # For windows
 
 #CC = clang
@@ -40,6 +41,12 @@ libpropagation.dll:	propagation.o
 	@echo 
 	$(CC) propagation.o $(LDFLAGS) -shared -Wl,--subsystem,console,--out-implib,libpropagation.dll,--add-stdcall-alias -o libpropagation.dll
 
+libpropagation.dynlib:	propagation.o
+	@echo 
+	@echo Making libpropagation.dynlib \(For Mac\)
+	@echo 
+	$(CC) propagation.o $(LDFLAGS) -shared -Wl,-install_name,libpropagation.dynlib -o libpropagation.dynlib
+
 
 libpropagation.so:	propagation.o
 	@echo 
@@ -53,11 +60,21 @@ libU2d.dll:	U2d.o wigner/libwigner.a
 	@echo 
 	$(CC) -o libU2d.dll -shared U2d.o $(LDFLAGS) -Wl,--subsystem,console,-no-seh,--out-implib,libU2d.dll,--add-stdcall-alias -static-libgcc -L./wigner -lwigner -Wl,--Bstatic -lgfortran -lquadmath $(OPENMP)
 
+
+libU2d.dynlib:	U2d.o wigner/libwigner.a
+	@echo 
+	@echo Making U2d \(cos^2 theta 2d matrix\) library
+	@echo 
+	$(CC) U2d.o $(OPENMP) $(LDFLAGS) -shared -Wl,-install_name,libU2d.dynlib -lwigner -L./wigner -lgfortran -o libU2d.dynlib
+
+
 libU2d.so:	U2d.o wigner/libwigner.a
 	@echo 
 	@echo Making U2d \(cos^2 theta 2d matrix\) library
 	@echo 
 	$(CC) U2d.o $(OPENMP) $(LDFLAGS) -shared -Wl,-soname,libU2d.so.1 -lwigner -L./wigner -lgfortran -o libU2d.so
+
+
 
 
 test_propagation: test_propagation.c propagation.c
