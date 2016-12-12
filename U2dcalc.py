@@ -33,7 +33,7 @@ try:
     if (utils.running_on_windows()):
         U2dlib = ctypes.CDLL("./libU2d.dll");
     elif (utils.running_on_mac()):
-        U2dlib = ctypes.CDLL("./libU2d.dynlib");
+        U2dlib = ctypes.CDLL("./libU2d.dylib");
     else:
         U2dlib = ctypes.CDLL("./libU2d.so");
     real_ndptr = ndpointer(flags=("CONTIGUOUS",),dtype=numpy.double);
