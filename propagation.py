@@ -44,12 +44,7 @@ import os
 libpropagation = None;
 can_propagate_using_ODE = False;
 try: # to load the C library for propagation.
-    if (utils.running_on_windows()):
-        libpropagation = ctypes.CDLL("./libpropagation.dll");
-    elif (utils.running_on_mac()):
-        libpropagation = ctypes.CDLL("./libpropagation.dylib");
-    else:
-        libpropagation = ctypes.CDLL("./libpropagation.so");
+    libpropagation = ctypes.CDLL("./libpropagation."+utils.library_file_ending());
     cplx_ndptr = ndpointer(flags=("CONTIGUOUS",),dtype=numpy.complex);
     real_ndptr = ndpointer(flags=("CONTIGUOUS",),dtype=numpy.double);
     libpropagation.fieldfree_propagation.restype = None;

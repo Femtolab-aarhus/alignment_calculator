@@ -45,6 +45,14 @@ def running_on_windows():
 def running_on_mac():
     return platform.system().lower().startswith('darwin');
 
+def library_file_ending():
+    if (running_on_windows()):
+        return "dll"
+    if (running_on_mac()):
+        return "dylib"
+    else:
+        return "so"
+
 def nice_time_step(B,Jmax,for_cos2d=False):
     ''' Chooses a nice time step based on the molecule and basis size '''
     # The highest frequency is the beat between

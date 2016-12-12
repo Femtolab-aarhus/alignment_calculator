@@ -30,12 +30,7 @@ from itertools import product
 matrix_element_file = "./precomputed_matrix_elements.npy";
 U2dlib = None;
 try:
-    if (utils.running_on_windows()):
-        U2dlib = ctypes.CDLL("./libU2d.dll");
-    elif (utils.running_on_mac()):
-        U2dlib = ctypes.CDLL("./libU2d.dylib");
-    else:
-        U2dlib = ctypes.CDLL("./libU2d.so");
+    U2dlib = ctypes.CDLL("./libU2d."+utils.library_file_ending());
     real_ndptr = ndpointer(flags=("CONTIGUOUS",),dtype=numpy.double);
 
     try: # May not be implemented.

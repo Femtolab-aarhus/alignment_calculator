@@ -4,12 +4,13 @@ all:	libpropagation.so libU2d.so  # For Linux/BSD
 #all:	libpropagation.dll libU2d.dll  # For windows
 
 #CC = clang
-CC = /usr/local/gfortran/bin/gcc
+CC = gcc
+#CC = /usr/local/gfortran/bin/gcc # For Mac
 #CC = i686-w64-mingw32-gcc # for windows, 32 bit
 #CC = x86_64-w64-mingw32-gcc # 64 bit
 
 # Fortran compiler to use
-FORT = /usr/local/gfortran/bin/gfortran
+FORT = gfortran
 #FORT = x86_64-w64-mingw32-gfortran # Windows targets, 32/64 bit
 #FORT = i686-w64-mingw32-gfortran
 
@@ -22,17 +23,20 @@ DEBUG = #-g
 SSE = #-msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -msse4 -msse4a
 AVX = #-mavx -mavx2 -mavx512f -mavx512pf -mavx512er -mavx512cd
 
-CFLAGS = -I /Users/adam/anaconda/include/  $(DEBUG) $(WARNINGS) -Wall -mtune=native -march=native $(SSE) $(AVX) -pipe -fpic -Ofast -ffast-math -fassociative-math -funroll-loops -fuse-linker-plugin -frename-registers -fweb -fomit-frame-pointer -funswitch-loops -funsafe-math-optimizations -fno-common
+
+INCLUDE = # -I /path/to/your/GSL/header/files
+LINKDIR = # -L /path/to/GSL/libs
+
+CFLAGS = $(INCLUDE) $(DEBUG) $(WARNINGS) -Wall -mtune=native -march=native $(SSE) $(AVX) -pipe -fpic -Ofast -ffast-math -fassociative-math -funroll-loops -fuse-linker-plugin -frename-registers -fweb -fomit-frame-pointer -funswitch-loops -funsafe-math-optimizations -fno-common
 
 OPENMP = -fopenmp # Comment out to remove openmp support
 DISABLE_GSL = # -DNO_GSL # Uncomment to remove code that depends on the GSL.
-# Also remove -lgslcblas and -lgsl from LDFLAGS.
+              # Also remove -lgslcblas and -lgsl from LDFLAGS.
 
 BLAS = -lgslcblas
 #BLAS = -lblas  # Use another, possibly faster BLAS implementation
 
-LDFLAGS = $(DEBUG) -lgsl $(BLAS) -lm -L /Users/adam/anaconda/lib/
-
+LDFLAGS = $(DEBUG) -lgsl $(BLAS) -lm $(LINKDIR)
 
 
 libpropagation.dll:	propagation.o
