@@ -1,14 +1,2 @@
 designer GUI.ui
 pyuic5 GUI.ui > _gui.py
-
-Roadblock for perfect windows support:
-
-     o locking files implemented with lockf
-       -> Could be solved by moving logic out of interaction.py
-          and into dispatcher ?
-     o U2d.c using mmap 
-       -> make U2d a shared library?
-     o U2d using gnu scientific library -> needs compile once solution 
-       -> licensing issues (avoided if we only use the dll internally)
-
-
