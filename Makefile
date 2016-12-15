@@ -24,14 +24,16 @@ SSE = #-msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -msse4 -msse4a
 AVX = #-mavx -mavx2 -mavx512f -mavx512pf -mavx512er -mavx512cd
 
 
-INCLUDE = # -I /path/to/your/GSL/header/files
-LINKDIR = # -L /path/to/GSL/libs
-
 CFLAGS = $(INCLUDE) $(DEBUG) $(WARNINGS) -Wall -mtune=native -march=native $(SSE) $(AVX) -pipe -fpic -Ofast -ffast-math -fassociative-math -funroll-loops -fuse-linker-plugin -frename-registers -fweb -fomit-frame-pointer -funswitch-loops -funsafe-math-optimizations -fno-common
 
 OPENMP = -fopenmp # Comment out to remove openmp support
 DISABLE_GSL = # -DNO_GSL # Uncomment to remove code that depends on the GSL.
               # Also remove -lgslcblas and -lgsl from LDFLAGS.
+		    # and the following directives
+
+INCLUDE = -I `gsl-config --prefix`/include/
+LINKDIR = -L `gsl-config --prefix`/lib/  
+
 
 BLAS = -lgslcblas
 #BLAS = -lblas  # Use another, possibly faster BLAS implementation
