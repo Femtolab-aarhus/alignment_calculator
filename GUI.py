@@ -408,7 +408,6 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
             plt.ioff();
             fig = plt.figure();
             psi_pulse = npzfile["psi"];
-            
             psi_final = psi_pulse[-1];
             plt.title('Final state distribution');
             plt.bar(numpy.arange(0,len(psi_final))-0.5,numpy.abs(psi_final)**2);
@@ -439,16 +438,19 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
             npzfile = self.last_result;
             t = npzfile["t"];
             cos2 = npzfile["cos2"];
-            cos2d = npzfile["cos2d"];
-                
+            cos2d = npzfile["cos2d"];                
             extra_header = [];
             extra_columns = [];
             if ('Javg' in npzfile.keys()):
                 Javg = npzfile["Javg"];
                 std = npzfile["std"];
+                psi_pulse = npzfile["psi"];
+                psi_final = psi_pulse[-1];
+                psi_out=numpy.abs(psi_final)**2;
                 percentile_999 = npzfile["percentile_999"];
-                extra_header = ["<J>","std(J)","J_99.9%"];
-                extra_columns = [Javg,std,percentile_999];
+                extra_header = ["<J>","std(J)","J_99.9%","Probability coefficients"];
+                extra_columns = [Javg,std,percentile_999,psi_final];
+
 
             utils.save_to_csv(filename,t,cos2,cos2d,extra_header,extra_columns,delimiter);
 
