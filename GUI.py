@@ -449,7 +449,7 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
                 psi_out=numpy.abs(psi_final)**2;
                 percentile_999 = npzfile["percentile_999"];
                 extra_header = ["<J>","std(J)","J_99.9%","Probability coefficients"];
-                extra_columns = [Javg,std,percentile_999,psi_final];
+                extra_columns = [Javg,std,percentile_999,psi_out];
 
 
             utils.save_to_csv(filename,t,cos2,cos2d,extra_header,extra_columns,delimiter);
