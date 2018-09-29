@@ -59,7 +59,7 @@ if __name__ == "__main__":
     pulses = [config.laserpulse(INTENSITY,FWHM_DURATION,0,waist=35e-6)];
     Jmax = 40;
     calculate_cos2d = True;
-    dt = utils.nice_time_step(molecule.B/(2*numpy.pi),Jmax,for_cos2d=calculate_cos2d)
+    dt = utils.nice_time_step(molecule.B,Jmax,for_cos2d=calculate_cos2d)
 
     probe_waist = 20e-6;
     percentile = 0.999;
