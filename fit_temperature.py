@@ -25,16 +25,10 @@
 # If you want to use this script, understand it, work on a copy of it
 # and remove the following notice:
 
-print("You must edit this file before you use it!",file=sys.stderr)
-# it is also a very good idea to run precalculate_matrix_elements.py before
-# optimizing the temperature.
-import sys
-sys.exit(1)
-
 import config
 import propagation
 import interaction
-import numpy 
+import numpy
 from numpy import pi,exp,sqrt,log,sin,cos
 import boltzmann
 import dispatcher
@@ -45,7 +39,7 @@ import scipy.optimize
 
 if __name__ == "__main__":
     # The program uses SI units internally.
-
+    print(INTENSITY)
     data = numpy.genfromtxt("./your_data.csv");
     t_data = data[:,0]*1e-12; # ps to seconds
     cos2d_data = data[:,1];
@@ -59,7 +53,7 @@ if __name__ == "__main__":
     pulses = [config.laserpulse(INTENSITY,FWHM_DURATION,0,waist=35e-6)];
     Jmax = 40;
     calculate_cos2d = True;
-    dt = utils.nice_time_step(molecule.B,Jmax,for_cos2d=calculate_cos2d)
+    dt = utils.nice_time_step(molecule.B/(2*numpy.pi),Jmax,for_cos2d=calculate_cos2d)
 
     probe_waist = 20e-6;
     percentile = 0.999;
@@ -76,15 +70,12 @@ if __name__ == "__main__":
 
         states = boltzmann.thermal_JKM_ensemble(T,molecule,Jmax,percentile,anisotropy);
         t,cos2,cos2d,psi = dispatcher.dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_cos2d,do_psi_pulse=False)
-        
+
         f = scipy.interpolate.interp1d(t,cos2d,kind='linear');
         cos2d_calc = f(t_data);
         error = numpy.sum((cos2d_calc-cos2d_data)**2);
         return error;
-    
+
     T_guess = numpy.array([1]); # kelvin
     T_fit = scipy.optimize.fmin(sum_sq_err,T_guess);
     print(T_fit);
-
-
-

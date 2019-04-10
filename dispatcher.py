@@ -17,7 +17,7 @@
 
 import kill_library_multithreading # must be done first
 
-import numpy 
+import numpy
 from numpy import pi
 import time
 import datetime
@@ -26,8 +26,21 @@ import multiprocessing
 import sys,os
 
 
-def dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_cos2d,do_psi_pulse=False,verbose=True):
-       
+def dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_cos2d,xc_filename,do_psi_pulse=False,verbose=True):
+    print("states = ",states)
+    print("pulses = ",pulses)
+    print("Jmax = ",Jmax)
+    print("Nshells = ",Nshells)
+    print("molecule = ",molecule)
+    print("B = ",molecule.B)
+    print("dt = ",dt)
+    print("t_end = ",t_end)
+    print("probe_waist = ",probe_waist)
+    print("calculate_cos2d = ",calculate_cos2d)
+    print("xc_filename = ",xc_filename)
+    print("do_psi_pulse = ",do_psi_pulse)
+    print("verbose = ",verbose)
+
     if (t_end < 0):
         B = molecule.B;
         revival = 1/(2*B/(2*pi));
@@ -38,9 +51,9 @@ def dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_
     psis = [];
 
     focalvolume_weight,focal_pulses = trace_backend.focal_volume_average(pulses,Nshells,probe_waist);
- 
+
     dispatcher_started_time = time.time();
-    with multiprocessing.Pool() as p:
+    with multiprocessing.Pool(min(multiprocessing.cpu_count()-1, 1)) as p:
 
         num_total = len(states)*Nshells;
         chunksize = max(1,int(num_total/multiprocessing.cpu_count()/10));
@@ -48,7 +61,7 @@ def dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_
         asyncs = [];
         for state in states:
             boltzmann_weight,J,K,M,KMsign = state;
-            args = [(J,K,M,KMsign,Jmax,molecule,focal_pulses[n],dt,t_end,calculate_cos2d,do_psi_pulse) for n in range(Nshells)];
+            args = [(J,K,M,KMsign,Jmax,molecule,focal_pulses[n],dt,t_end,calculate_cos2d,xc_filename,do_psi_pulse) for n in range(Nshells)];
             asyncs.append(p.starmap_async(trace_backend.cos2_trace,args,chunksize));
 
         num = 0;
@@ -98,4 +111,3 @@ def timedelta_round(td,digits):
     else:
         td = td[0];
     return td;
-

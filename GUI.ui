@@ -10,8 +10,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>517</width>
-    <height>579</height>
+    <width>521</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -37,18 +37,14 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>icon.png</normaloff>icon.png</iconset>
-  </property>
-  <property name="styleSheet">
-   <string notr="true">font-family: &quot;Sans Serif&quot;;
-font-size: 9pt;</string>
+    <normaloff>../alignment_calc_custom_pulse/icon.png</normaloff>../alignment_calc_custom_pulse/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QPushButton" name="mybutn">
     <property name="geometry">
      <rect>
-      <x>372</x>
-      <y>500</y>
+      <x>420</x>
+      <y>530</y>
       <width>91</width>
       <height>24</height>
      </rect>
@@ -72,7 +68,7 @@ font-size: 9pt;</string>
       <x>10</x>
       <y>30</y>
       <width>221</width>
-      <height>231</height>
+      <height>251</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -88,7 +84,7 @@ font-size: 9pt;</string>
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>170</y>
+       <y>200</y>
        <width>151</width>
        <height>16</height>
       </rect>
@@ -101,7 +97,7 @@ font-size: 9pt;</string>
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>190</y>
+       <y>220</y>
        <width>201</width>
        <height>20</height>
       </rect>
@@ -171,10 +167,6 @@ font-size: 9pt;</string>
      <property name="statusTip">
       <string>Linear molecules have A=0</string>
      </property>
-     <property name="styleSheet">
-      <string notr="true">font-weight: bold;
-font-size: 12pt;</string>
-     </property>
      <property name="text">
       <string>A</string>
      </property>
@@ -197,10 +189,6 @@ font-size: 12pt;</string>
      </property>
      <property name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Main rotational constant.&lt;/p&gt;&lt;p&gt;This rotational constant corresponds to the two identical moments of inertia in a principal frame.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">font-weight: bold;
-font-size: 12pt;</string>
      </property>
      <property name="text">
       <string>B</string>
@@ -283,9 +271,6 @@ font-size: 12pt;</string>
        <pointsize>12</pointsize>
       </font>
      </property>
-     <property name="styleSheet">
-      <string notr="true">font-size: 12pt;</string>
-     </property>
      <property name="text">
       <string>Rotational constants</string>
      </property>
@@ -294,7 +279,7 @@ font-size: 12pt;</string>
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>80</y>
+       <y>110</y>
        <width>171</width>
        <height>16</height>
       </rect>
@@ -304,9 +289,6 @@ font-size: 12pt;</string>
        <pointsize>12</pointsize>
       </font>
      </property>
-     <property name="styleSheet">
-      <string notr="true">font-size: 12pt;</string>
-     </property>
      <property name="text">
       <string>Polarizability tensor</string>
      </property>
@@ -315,7 +297,7 @@ font-size: 12pt;</string>
      <property name="geometry">
       <rect>
        <x>90</x>
-       <y>100</y>
+       <y>130</y>
        <width>71</width>
        <height>20</height>
       </rect>
@@ -340,7 +322,7 @@ font-size: 12pt;</string>
      <property name="geometry">
       <rect>
        <x>200</x>
-       <y>100</y>
+       <y>130</y>
        <width>16</width>
        <height>16</height>
       </rect>
@@ -356,7 +338,7 @@ font-size: 12pt;</string>
      <property name="geometry">
       <rect>
        <x>90</x>
-       <y>120</y>
+       <y>150</y>
        <width>71</width>
        <height>20</height>
       </rect>
@@ -381,7 +363,7 @@ font-size: 12pt;</string>
      <property name="geometry">
       <rect>
        <x>200</x>
-       <y>120</y>
+       <y>150</y>
        <width>16</width>
        <height>16</height>
       </rect>
@@ -394,7 +376,7 @@ font-size: 12pt;</string>
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>120</y>
+       <y>150</y>
        <width>61</width>
        <height>20</height>
       </rect>
@@ -409,10 +391,6 @@ font-size: 12pt;</string>
      <property name="toolTip">
       <string>Polarizability volume perpendicular to the main molecular axis</string>
      </property>
-     <property name="styleSheet">
-      <string notr="true">font-weight: bold;
-font-size: 12pt;</string>
-     </property>
      <property name="text">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;α&lt;span style=&quot; vertical-align:sub;&quot;&gt;&amp;perp;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
@@ -421,7 +399,7 @@ font-size: 12pt;</string>
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>100</y>
+       <y>130</y>
        <width>61</width>
        <height>20</height>
       </rect>
@@ -436,10 +414,6 @@ font-size: 12pt;</string>
      <property name="toolTip">
       <string>Polarizability volume along main molecular axis</string>
      </property>
-     <property name="styleSheet">
-      <string notr="true">font-weight: bold;
-font-size: 12pt;</string>
-     </property>
      <property name="text">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;α&lt;/span&gt;&lt;span style=&quot; font-size:12pt; vertical-align:sub;&quot;&gt;∥&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
@@ -448,7 +422,7 @@ font-size: 12pt;</string>
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>140</y>
+       <y>170</y>
        <width>41</width>
        <height>21</height>
       </rect>
@@ -463,10 +437,6 @@ font-size: 12pt;</string>
      <property name="toolTip">
       <string>Polarizability volume anisotropy</string>
      </property>
-     <property name="styleSheet">
-      <string notr="true">font-weight: bold;
-font-size: 12pt;</string>
-     </property>
      <property name="text">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Δα&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
@@ -475,25 +445,20 @@ font-size: 12pt;</string>
      <property name="geometry">
       <rect>
        <x>90</x>
-       <y>140</y>
+       <y>170</y>
        <width>71</width>
        <height>21</height>
       </rect>
      </property>
      <property name="font">
       <font>
-       <family>Sans Serif</family>
-       <pointsize>12</pointsize>
+       <pointsize>11</pointsize>
        <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
      <property name="toolTip">
       <string>Polarizability volume anisotropy</string>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">font-size: 12pt;
-font-weight: bold;</string>
      </property>
      <property name="text">
       <string>0</string>
@@ -506,7 +471,7 @@ font-weight: bold;</string>
      <property name="geometry">
       <rect>
        <x>200</x>
-       <y>140</y>
+       <y>170</y>
        <width>16</width>
        <height>16</height>
       </rect>
@@ -515,12 +480,91 @@ font-weight: bold;</string>
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;3&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
+    <widget class="QLineEdit" name="Dconst">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>80</y>
+       <width>71</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rotational distortion constant. Calculation is faster if this is zero&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="statusTip">
+      <string>Linear molecules have A=0</string>
+     </property>
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="maxLength">
+      <number>11</number>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="placeholderText">
+      <string>0</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_51">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>80</y>
+       <width>71</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rotational distortion constant. Calculation is faster if this is zero&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="statusTip">
+      <string>Linear molecules have A=0</string>
+     </property>
+     <property name="text">
+      <string>D&lt;sub&gt;J&lt;/sub&gt;</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_53">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>80</y>
+       <width>31</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rotational distortion constant. Calculation is faster if this is zero&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="statusTip">
+      <string>Linear molecules have A=0</string>
+     </property>
+     <property name="text">
+      <string>KHz</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+     </property>
+    </widget>
    </widget>
    <widget class="QTabWidget" name="InitConditionsTab">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>290</y>
+      <y>300</y>
       <width>311</width>
       <height>171</height>
      </rect>
@@ -938,10 +982,6 @@ font-weight: bold;</string>
         <bold>true</bold>
        </font>
       </property>
-      <property name="styleSheet">
-       <string notr="true">font-weight: bold;
-font-size: 18pt;</string>
-      </property>
       <property name="text">
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;|JKM&amp;gt; = &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
@@ -962,10 +1002,6 @@ font-size: 18pt;</string>
         <bold>true</bold>
        </font>
       </property>
-      <property name="styleSheet">
-       <string notr="true">font-weight: bold;
-font-size: 18pt;</string>
-      </property>
       <property name="text">
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;|&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
@@ -985,10 +1021,6 @@ font-size: 18pt;</string>
         <weight>75</weight>
         <bold>true</bold>
        </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">font-weight: bold;
-font-size: 18pt;</string>
       </property>
       <property name="text">
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&amp;gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1031,389 +1063,563 @@ font-size: 18pt;</string>
      <string>Molecule data</string>
     </property>
    </widget>
-   <widget class="QFrame" name="frame_2">
+   <widget class="QTabWidget" name="PulseTab">
     <property name="geometry">
      <rect>
       <x>240</x>
-      <y>30</y>
+      <y>0</y>
       <width>271</width>
-      <height>231</height>
+      <height>171</height>
      </rect>
     </property>
-    <property name="frameShape">
-     <enum>QFrame::Panel</enum>
+    <property name="currentIndex">
+     <number>0</number>
     </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <property name="lineWidth">
-     <number>1</number>
-    </property>
-    <widget class="QLabel" name="label_12">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>30</y>
-       <width>101</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pulse duration, Full width at half max.&lt;/p&gt;&lt;p&gt;You are allowed to use scientific notation. E.g. setting the duration to 1e6 fs would set the pulse duration to 1 ns, and you would be simulating adiabatic alignment.&lt;/p&gt;&lt;p&gt;When doing so, it is very advantageous to lower the basis size drastically.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="text">
-      <string>FWHM duration</string>
-     </property>
+    <widget class="QWidget" name="GaussianPulse">
+     <attribute name="title">
+      <string>Gaussian Pulse</string>
+     </attribute>
+     <widget class="QLabel" name="label_12">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pulse duration, Full width at half max.&lt;/p&gt;&lt;p&gt;You are allowed to use scientific notation. E.g. setting the duration to 1e6 fs would set the pulse duration to 1 ns, and you would be simulating adiabatic alignment.&lt;/p&gt;&lt;p&gt;When doing so, it is very advantageous to lower the basis size drastically.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="text">
+       <string>FWHM duration</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="pulseDuration">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>40</y>
+        <width>71</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pulse duration, Full width at half max.&lt;/p&gt;&lt;p&gt;You are allowed to use scientific notation. E.g. setting the duration to 1e6 fs would set the pulse duration to 1 ns, and you would be simulating adiabatic alignment.&lt;/p&gt;&lt;p&gt;When doing so, it is very advantageous to lower the basis size drastically.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>300</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_13">
+      <property name="geometry">
+       <rect>
+        <x>240</x>
+        <y>40</y>
+        <width>21</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>fs</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_14">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>80</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Kick (or pump) pulse</string>
+      </property>
+      <property name="statusTip">
+       <string>Kick pulse intensity</string>
+      </property>
+      <property name="text">
+       <string>Peak intensity</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="pulseIntensity">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>80</y>
+        <width>71</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Kick (or pump) pulse</string>
+      </property>
+      <property name="statusTip">
+       <string>Kick pulse intensity</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>16.3</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_15">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>80</y>
+        <width>70</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TW/cm²</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="pumpWaist">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>60</y>
+        <width>71</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spot size of the pump (or kick) pulse&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>35</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_17">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spot size of the pump (or kick) pulse&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="text">
+       <string>Pump waist</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_18">
+      <property name="geometry">
+       <rect>
+        <x>240</x>
+        <y>60</y>
+        <width>21</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>µm</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>0</y>
+        <width>280</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Gaussian, linearly polarized</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="pulseEnergy">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>20</y>
+        <width>71</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Pump pulse energy</string>
+      </property>
+      <property name="statusTip">
+       <string>Pump pulse energy</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>100</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_46">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>20</y>
+        <width>70</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>µJ</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_22">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pulse duration, Full width at half max.&lt;/p&gt;&lt;p&gt;You are allowed to use scientific notation. E.g. setting the duration to 1e6 fs would set the pulse duration to 1 ns, and you would be simulating adiabatic alignment.&lt;/p&gt;&lt;p&gt;When doing so, it is very advantageous to lower the basis size drastically.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="text">
+       <string>Pulse Energy</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="pulseFluence">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>100</y>
+        <width>71</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Kick (or pump) pulse</string>
+      </property>
+      <property name="statusTip">
+       <string>Kick pulse intensity</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>5.2</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_47">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>100</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Kick (or pump) pulse</string>
+      </property>
+      <property name="statusTip">
+       <string>Kick pulse intensity</string>
+      </property>
+      <property name="text">
+       <string>Fluence</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_48">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>100</y>
+        <width>70</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>J/cm²</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+      </property>
+     </widget>
     </widget>
-    <widget class="QLineEdit" name="pulseDuration">
-     <property name="geometry">
-      <rect>
-       <x>120</x>
-       <y>30</y>
-       <width>71</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pulse duration, Full width at half max.&lt;/p&gt;&lt;p&gt;You are allowed to use scientific notation. E.g. setting the duration to 1e6 fs would set the pulse duration to 1 ns, and you would be simulating adiabatic alignment.&lt;/p&gt;&lt;p&gt;When doing so, it is very advantageous to lower the basis size drastically.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="placeholderText">
-      <string>300</string>
-     </property>
+    <widget class="QWidget" name="CustomPulse">
+     <attribute name="title">
+      <string>Custom Pulse</string>
+     </attribute>
+     <widget class="QLabel" name="label_49">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Kick (or pump) pulse</string>
+      </property>
+      <property name="statusTip">
+       <string>Kick pulse intensity</string>
+      </property>
+      <property name="text">
+       <string>Fluence</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="pumpWaist_2">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>40</y>
+        <width>71</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spot size of the pump (or kick) pulse&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>35</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_52">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pulse duration, Full width at half max.&lt;/p&gt;&lt;p&gt;You are allowed to use scientific notation. E.g. setting the duration to 1e6 fs would set the pulse duration to 1 ns, and you would be simulating adiabatic alignment.&lt;/p&gt;&lt;p&gt;When doing so, it is very advantageous to lower the basis size drastically.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="text">
+       <string>Pulse Energy</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="pulseEnergy_2">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>20</y>
+        <width>71</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Kick (or pump) pulse</string>
+      </property>
+      <property name="statusTip">
+       <string>Kick pulse intensity</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>100</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="pulseFluence_2">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>60</y>
+        <width>71</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Kick (or pump) pulse</string>
+      </property>
+      <property name="statusTip">
+       <string>Kick pulse intensity</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>5.2</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_57">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>60</y>
+        <width>70</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>J/cm²</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_59">
+      <property name="geometry">
+       <rect>
+        <x>240</x>
+        <y>40</y>
+        <width>21</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>µm</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_61">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>20</y>
+        <width>70</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>µJ</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_62">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spot size of the pump (or kick) pulse&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="text">
+       <string>Pump waist</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_37">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>0</y>
+        <width>280</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Custom Pulse, linearly polarized</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="loadpulse">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>80</y>
+        <width>85</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Load Pulse</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="currentFile">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>110</y>
+        <width>251</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spot size of the pump (or kick) pulse&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string/>
+      </property>
+     </widget>
     </widget>
-    <widget class="QLabel" name="label_13">
-     <property name="geometry">
-      <rect>
-       <x>240</x>
-       <y>30</y>
-       <width>21</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>fs</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_14">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>10</y>
-       <width>101</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Kick (or pump) pulse</string>
-     </property>
-     <property name="statusTip">
-      <string>Kick pulse intensity</string>
-     </property>
-     <property name="text">
-      <string>Peak intensity</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="pulseIntensity">
-     <property name="geometry">
-      <rect>
-       <x>120</x>
-       <y>10</y>
-       <width>71</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Kick (or pump) pulse</string>
-     </property>
-     <property name="statusTip">
-      <string>Kick pulse intensity</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="placeholderText">
-      <string>10</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_15">
-     <property name="geometry">
-      <rect>
-       <x>190</x>
-       <y>10</y>
-       <width>70</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>TW/cm²</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="pumpWaist">
-     <property name="geometry">
-      <rect>
-       <x>120</x>
-       <y>70</y>
-       <width>71</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spot size of the pump (or kick) pulse&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="placeholderText">
-      <string>35</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_17">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>70</y>
-       <width>101</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spot size of the pump (or kick) pulse&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="text">
-      <string>Pump waist</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_18">
-     <property name="geometry">
-      <rect>
-       <x>240</x>
-       <y>70</y>
-       <width>21</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>µm</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_19">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>90</y>
-       <width>101</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Spot size of the probe pulse</string>
-     </property>
-     <property name="text">
-      <string>Probe waist</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="probeWaist">
-     <property name="geometry">
-      <rect>
-       <x>120</x>
-       <y>90</y>
-       <width>71</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Spot size of the probe pulse</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="maxLength">
-      <number>8</number>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="placeholderText">
-      <string>25</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_20">
-     <property name="geometry">
-      <rect>
-       <x>240</x>
-       <y>90</y>
-       <width>21</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>µm</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_21">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>150</y>
-       <width>211</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; text-decoration: underline;&quot;&gt;F&lt;/span&gt;ocal &lt;span style=&quot; text-decoration: underline;&quot;&gt;V&lt;/span&gt;olume &lt;span style=&quot; text-decoration: underline;&quot;&gt;A&lt;/span&gt;veraging shell(s)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_22">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>170</y>
-       <width>230</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>(=1 for no focal volume averaging)</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="Nshells">
-     <property name="geometry">
-      <rect>
-       <x>120</x>
-       <y>130</y>
-       <width>71</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Number of focal volume iso intensity shells to average traces over</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="maxLength">
-      <number>3</number>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="placeholderText">
-      <string>1</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_30">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>130</y>
-       <width>80</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Number of focal volume iso intensity shells to average traces over</string>
-     </property>
-     <property name="text">
-      <string>#FVA shells</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="t0">
-     <property name="geometry">
-      <rect>
-       <x>120</x>
-       <y>200</y>
-       <width>71</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Kick pulse time&lt;/p&gt;&lt;p&gt;Tip: If you need to propagate to longer times, add a second, 0 intensity pulse at t = t0 + the extra time you need.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="placeholderText">
-      <string>0</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_43">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>200</y>
-       <width>101</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Kick pulse time&lt;/p&gt;&lt;p&gt;Tip: If you need to propagate to longer times, add a second, 0 intensity pulse at t = t0 + the extra time you need.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;T&lt;span style=&quot; vertical-align:sub;&quot;&gt;0&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_44">
-     <property name="geometry">
-      <rect>
-       <x>240</x>
-       <y>200</y>
-       <width>21</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>ps</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QLabel" name="label_3">
-    <property name="geometry">
-     <rect>
-      <x>240</x>
-      <y>10</y>
-      <width>280</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Laser pulse (Gaussian, linearly polarized)</string>
-    </property>
    </widget>
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>270</y>
+      <y>280</y>
       <width>91</width>
       <height>16</height>
      </rect>
@@ -1426,7 +1632,7 @@ font-size: 18pt;</string>
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>470</y>
+      <y>480</y>
       <width>21</width>
       <height>19</height>
      </rect>
@@ -1444,41 +1650,13 @@ font-size: 18pt;</string>
      <bool>false</bool>
     </property>
    </widget>
-   <widget class="QLabel" name="label_37">
-    <property name="geometry">
-     <rect>
-      <x>240</x>
-      <y>248</y>
-      <width>271</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Sans Serif</family>
-      <pointsize>7</pointsize>
-     </font>
-    </property>
-    <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For multiple pulses, separate each t0 and optionally peak intensity, FWHM, and pump waist with a comma. If a field other than t0 only contains one value, all kick pulses will use that value.&lt;/p&gt;&lt;p&gt;The pulses must not overlap each other.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-    </property>
-    <property name="statusTip">
-     <string/>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">font-size: 7pt;</string>
-    </property>
-    <property name="text">
-     <string>For multiple pulses, separate t0 with comma</string>
-    </property>
-   </widget>
    <widget class="QFrame" name="frame_3">
     <property name="geometry">
      <rect>
       <x>340</x>
-      <y>290</y>
+      <y>300</y>
       <width>171</width>
-      <height>171</height>
+      <height>221</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -1506,10 +1684,6 @@ font-size: 18pt;</string>
      <property name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The lower, the faster the calculation. If too low, the result will be incorrect.&lt;/p&gt;&lt;p&gt;The optimal value depends on the laser pulse and the molecule in question.&lt;/p&gt;&lt;p&gt;Tip: for adiabatic alignment, Jmax can be really low.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
-     <property name="styleSheet">
-      <string notr="true">font-size: 12pt;
-font-weight: bold;</string>
-     </property>
      <property name="text">
       <string>Jmax =</string>
      </property>
@@ -1517,7 +1691,7 @@ font-weight: bold;</string>
     <widget class="QLineEdit" name="Jmax">
      <property name="geometry">
       <rect>
-       <x>100</x>
+       <x>110</x>
        <y>10</y>
        <width>41</width>
        <height>20</height>
@@ -1542,31 +1716,12 @@ font-weight: bold;</string>
       <string>140</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_55">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>32</y>
-       <width>151</width>
-       <height>40</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The lower, the faster the calculation. If too low, the result will be incorrect.&lt;/p&gt;&lt;p&gt;The optimal value depends on the laser pulse and the molecule in question.&lt;/p&gt;&lt;p&gt;Tip: for adiabatic alignment, Jmax can be really low.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Largest J quantum&lt;br/&gt;number |JKM&amp;gt;. Should&lt;br/&gt;be as low as possible.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-     </property>
-    </widget>
     <widget class="QRadioButton" name="doODE">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>149</y>
-       <width>61</width>
+       <y>200</y>
+       <width>51</width>
        <height>19</height>
       </rect>
      </property>
@@ -1587,8 +1742,8 @@ font-weight: bold;</string>
      <property name="geometry">
       <rect>
        <x>100</x>
-       <y>149</y>
-       <width>71</width>
+       <y>200</y>
+       <width>61</width>
        <height>19</height>
       </rect>
      </property>
@@ -1606,7 +1761,7 @@ font-weight: bold;</string>
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>132</y>
+       <y>180</y>
        <width>150</width>
        <height>21</height>
       </rect>
@@ -1619,7 +1774,7 @@ font-weight: bold;</string>
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>129</y>
+       <y>180</y>
        <width>170</width>
        <height>3</height>
       </rect>
@@ -1641,26 +1796,83 @@ font-weight: bold;</string>
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
-   </widget>
-   <widget class="QLabel" name="label_54">
-    <property name="geometry">
-     <rect>
-      <x>340</x>
-      <y>270</y>
-      <width>171</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Basis size, propagation</string>
-    </property>
+    <widget class="QLabel" name="label_55">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>211</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The lower, the faster the calculation. If too low, the result will be incorrect.&lt;/p&gt;&lt;p&gt;The optimal value depends on the laser pulse and the molecule in question.&lt;/p&gt;&lt;p&gt;Tip: for adiabatic alignment, Jmax can be really low.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Largest J quantum&lt;br/&gt;number |JKM&amp;gt;. Should&lt;br/&gt;be as low as possible.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="propTime">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>150</y>
+       <width>121</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Time to propagate pulse to.&lt;/p&gt;&lt;p&gt;By default propagates to first revival&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="choosePropTime">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>130</y>
+       <width>141</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Time to propagate pulse to.&lt;/p&gt;&lt;p&gt;By default propagates to first revival&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="statusTip">
+      <string/>
+     </property>
+     <property name="text">
+      <string>Choose propagation time</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_50">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>150</y>
+       <width>20</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>ps</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QLabel" name="cos2dlabel">
     <property name="geometry">
      <rect>
       <x>28</x>
-      <y>470</y>
-      <width>391</width>
+      <y>480</y>
+      <width>141</width>
       <height>19</height>
      </rect>
     </property>
@@ -1681,10 +1893,16 @@ font-weight: bold;</string>
     <property name="geometry">
      <rect>
       <x>29</x>
-      <y>491</y>
-      <width>340</width>
+      <y>501</y>
+      <width>201</width>
       <height>51</height>
      </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
     </property>
     <property name="toolTip">
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If you don't, the matrix elements will be re-computed every time you calculate a trace.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1697,13 +1915,13 @@ font-weight: bold;</string>
     <property name="geometry">
      <rect>
       <x>350</x>
-      <y>375</y>
+      <y>390</y>
       <width>120</width>
       <height>19</height>
      </rect>
     </property>
     <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sampling time step, not propagation time step. By default, this corresponds to 5 times the Nyquist sampling rate for traces in the impulsive limit.&lt;/p&gt;&lt;p&gt;If your simulate adiabatic alignment, consider increasing the time step a lot to save time.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sampling time step, not propagation time step. By default, this corresponds to 5 times the Nyquist sampling rate for traces in the impulsive limit.&lt;/p&gt;&lt;p&gt;If your simulate adiabatic alignment, consider increasing the time step a lot to save time.&lt;/p&gt;&lt;p&gt;Note that for custom pulses, this determines the sampling&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="statusTip">
      <string>For plotting only</string>
@@ -1719,13 +1937,13 @@ font-weight: bold;</string>
     <property name="geometry">
      <rect>
       <x>350</x>
-      <y>395</y>
+      <y>410</y>
       <width>121</width>
       <height>20</height>
      </rect>
     </property>
     <property name="toolTip">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sampling time step, not propagation time step. By default, this corresponds to 5 times the Nyquist sampling rate for traces in the impulsive limit.&lt;/p&gt;&lt;p&gt;If your simulate adiabatic alignment, consider increasing the time step a lot to save time.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sampling time step, not propagation time step. By default, this corresponds to 5 times the Nyquist sampling rate for traces in the impulsive limit.&lt;/p&gt;&lt;p&gt;If your simulate adiabatic alignment, consider increasing the time step a lot to save time.&lt;/p&gt;&lt;p&gt;Note that for custom pulses, this determines the sampling&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1734,8 +1952,8 @@ font-weight: bold;</string>
    <widget class="QLabel" name="label_28">
     <property name="geometry">
      <rect>
-      <x>486</x>
-      <y>395</y>
+      <x>480</x>
+      <y>410</y>
       <width>20</width>
       <height>20</height>
      </rect>
@@ -1744,14 +1962,208 @@ font-weight: bold;</string>
      <string>ps</string>
     </property>
    </widget>
+   <widget class="QFrame" name="frame_2">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>170</y>
+      <width>271</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QLineEdit" name="probeWaist">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>30</y>
+       <width>71</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Spot size of the probe pulse</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="maxLength">
+      <number>8</number>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="placeholderText">
+      <string>25</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="Nshells">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>70</y>
+       <width>71</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Number of focal volume iso intensity shells to average traces over</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="maxLength">
+      <number>3</number>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="placeholderText">
+      <string>1</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_21">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>211</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; text-decoration: underline;&quot;&gt;F&lt;/span&gt;ocal &lt;span style=&quot; text-decoration: underline;&quot;&gt;V&lt;/span&gt;olume &lt;span style=&quot; text-decoration: underline;&quot;&gt;A&lt;/span&gt;veraging shell(s)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_30">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>70</y>
+       <width>80</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Number of focal volume iso intensity shells to average traces over</string>
+     </property>
+     <property name="text">
+      <string>#FVA shells</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_19">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>101</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Spot size of the probe pulse</string>
+     </property>
+     <property name="text">
+      <string>Probe waist</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_20">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>30</y>
+       <width>21</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>µm</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_44">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>10</y>
+       <width>21</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>ps</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="t0">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>10</y>
+       <width>71</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Kick pulse time&lt;/p&gt;&lt;p&gt;Tip: If you need to propagate to longer times, add a second, 0 intensity pulse at t = t0 + the extra time you need.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="placeholderText">
+      <string>0</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_43">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>101</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Kick pulse time&lt;/p&gt;&lt;p&gt;Tip: If you need to propagate to longer times, add a second, 0 intensity pulse at t = t0 + the extra time you need.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;T&lt;span style=&quot; vertical-align:sub;&quot;&gt;0&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QLabel" name="label_54">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>280</y>
+      <width>171</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Basis size, propagation</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>517</width>
-     <height>24</height>
+     <width>521</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1834,13 +2246,14 @@ font-weight: bold;</string>
   <tabstop>Bconst</tabstop>
   <tabstop>alpha_par</tabstop>
   <tabstop>alpha_perp</tabstop>
-  <tabstop>pulseIntensity</tabstop>
+  <tabstop>pulseEnergy</tabstop>
   <tabstop>pulseDuration</tabstop>
   <tabstop>pumpWaist</tabstop>
+  <tabstop>t0</tabstop>
+  <tabstop>pulseEnergy_2</tabstop>
+  <tabstop>pumpWaist_2</tabstop>
   <tabstop>probeWaist</tabstop>
   <tabstop>Nshells</tabstop>
-  <tabstop>t0</tabstop>
-  <tabstop>InitConditionsTab</tabstop>
   <tabstop>Temperature</tabstop>
   <tabstop>abundanceEven</tabstop>
   <tabstop>abundanceOdd</tabstop>
@@ -1856,6 +2269,13 @@ font-weight: bold;</string>
   <tabstop>doODE</tabstop>
   <tabstop>doMatrix</tabstop>
   <tabstop>mybutn</tabstop>
+  <tabstop>PulseTab</tabstop>
+  <tabstop>InitConditionsTab</tabstop>
+  <tabstop>pulseFluence</tabstop>
+  <tabstop>pulseFluence_2</tabstop>
+  <tabstop>loadpulse</tabstop>
+  <tabstop>currentFile</tabstop>
+  <tabstop>pulseIntensity</tabstop>
  </tabstops>
  <resources/>
  <connections/>

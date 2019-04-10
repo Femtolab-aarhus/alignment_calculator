@@ -1,4 +1,4 @@
-#!/usr/bin/python3 
+#!/usr/bin/python3
 
 #   Copyright 2016 Anders Aspegren Søndergaard / Femtolab, Aarhus University
 #
@@ -30,9 +30,9 @@ import utils
 import time
 import U2dcalc
 
-def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,do_psi_pulse=False):
+def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,xc_filename,do_psi_pulse=False):
     laserpulses.sort();
-    window = 3/2.0;
+    window = 3.0/2
 
     psi = numpy.zeros(Jmax+1,dtype=numpy.complex);
     psi[J] = 1;
@@ -42,37 +42,63 @@ def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,do_psi_p
     cos2d = [];
     psis = [];
 
-
     U, U0, U1, U2 = interaction.MeanCos2Matrix(Jmax,K,M,KMsign)
     if (do_cos2d):
         U2d = U2dcalc.MeanCos2dMatrix(Jmax,K,M,KMsign);
 
-    last_t = laserpulses[0].t-window*laserpulses[0].FWHM-max(1e-12,5*dt); # Start 1 ps before first pulse
+    FWHM=laserpulses[0].FWHM
+    t=laserpulses[0].t
+
+    if os.path.isfile(xc_filename):
+        use_xc=1
+        half_range, start_t, end_t = utils.xc_window(xc_filename) #find the window and the first t point
+    else:
+        use_xc=0
+        half_range=window*FWHM
+        start_t = -half_range
+        end_t = half_range
+    
+    last_t = t+start_t-max(1e-12,5*dt); # Start 1 ps before first pulse
+
+
 
     A = molecule.A;
     B = molecule.B;
+    D = molecule.D;
     Js = numpy.arange(0,Jmax+1,1);
-    E_rot = (B*Js*(Js+1) + (A-B)*K**2); # * hbar but / hbar for input to fieldfree
-    for pulse in laserpulses:
 
+    E_rot = B*Js*(Js+1) + (A-B)*K**2 - D*(Js*(Js+1))**2; # *hbar / hbar for solver
+    
+    #check if rotational levels are sane
+    if (numpy.any(numpy.diff(E_rot, axis=0)<0)):
+        raise RuntimeError("Unphysical rotational energy levels")
+        
+    for pulse in laserpulses:
         t = pulse.t;
         FWHM = pulse.FWHM;
         I_max = pulse.I_max;
 
-        if (last_t > t-window*FWHM):
+        if use_xc==1:
+            FWHM=half_range/window
+        elif use_xc==0:
+            half_range=FWHM*window
+
+        if (last_t > t-half_range and not use_xc):
             raise RuntimeError("Pulses are not well enough separated.");
 
-        num_steps = max(2,numpy.ceil((t-window*FWHM-last_t)/dt))
-        times_before = numpy.linspace(last_t,t-window*FWHM,num_steps);
+        num_steps = max(2,numpy.ceil((t+start_t-last_t)/dt))
+        times_before = numpy.linspace(last_t,t+start_t,num_steps);
         # Propagate between pulses
-        psi_before,cos2_before,cos2d_before = propagation.fieldfree_propagation(psi,last_t,times_before,E_rot,Jmax,K,M,KMsign,do_cos2d);
+        psi_before,cos2_before,cos2d_before = propagation.fieldfree_propagation(psi,last_t,times_before,E_rot,Jmax,K,M,KMsign,D,do_cos2d);
 
-        num_steps = max(2,numpy.ceil(2*window*FWHM/dt));
+
+        num_steps = max(2,numpy.ceil(2*half_range/dt));
         if (do_psi_pulse):
             num_steps = max(20,num_steps);
+        
+        integration_time = numpy.linspace(start_t,end_t,num_steps);
 
-        integration_time = numpy.linspace(-window*FWHM,window*FWHM,num_steps);
-        transfer = propagation.transfer_KM(psi_before[-1],K,M,KMsign,Jmax,I_max,FWHM,integration_time,molecule);
+        transfer = propagation.transfer_KM(psi_before[-1],K,M,KMsign,Jmax,I_max,FWHM,integration_time,molecule,xc_filename);
         S = sum(numpy.abs(transfer[-1,:])**2)
         if (numpy.abs(1-S) > 0.001):
             raise RuntimeError("Norm not preserved! "+ str((J,K,M,S)));
@@ -98,12 +124,12 @@ def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,do_psi_p
             psis.append(transfer);
 
         psi = transfer[-1,:];
-        last_t = t + window*FWHM;
+        last_t = t + end_t;
 
     # End looping over laser pulses. Now propagate to t_end.
 
     times_after = numpy.arange(last_t,last_t+t_end,dt);
-    psi_after,cos2_after,cos2d_after = propagation.fieldfree_propagation(psi,last_t,times_after,E_rot,Jmax,K,M,KMsign,do_cos2d);
+    psi_after,cos2_after,cos2d_after = propagation.fieldfree_propagation(psi,last_t,times_after,E_rot,Jmax,K,M,KMsign,D,do_cos2d);
     times.append(times_after[1:]);
     cos2.append(cos2_after[1:]);
     if (do_cos2d):
@@ -119,7 +145,7 @@ def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,do_psi_p
 
 
 def focal_volume_average(laserpulses,Nshells,probe_waist):
-    
+
     pulses = [];
 
     laserpulses.sort();
@@ -147,4 +173,3 @@ def focal_volume_average(laserpulses,Nshells,probe_waist):
         pulses.append(shell_pulses);
 
     return Weight,pulses;
-

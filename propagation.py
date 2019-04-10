@@ -22,6 +22,7 @@ import numpy
 import numpy as np
 import scipy
 import scipy.integrate
+import scipy.interpolate
 from scipy.integrate import ode
 from scipy import linalg
 from numpy import exp,log,sqrt,pi
@@ -40,6 +41,7 @@ from itertools import repeat
 import tempfile
 import utils
 import os
+import matplotlib.pyplot as plt
 
 libpropagation = None;
 can_propagate_using_ODE = False;
@@ -50,14 +52,14 @@ try: # to load the C library for propagation.
     libpropagation.fieldfree_propagation.restype = None;
     libpropagation.fieldfree_propagation.argtypes = (ct.c_int, ct.c_int, ct.c_size_t, cplx_ndptr, ct.c_double, ct.c_size_t, real_ndptr, real_ndptr, real_ndptr, real_ndptr, real_ndptr, cplx_ndptr, real_ndptr, ct.c_bool, real_ndptr, real_ndptr);
     libpropagation.propagate_field.restype = ct.c_int;
-    libpropagation.propagate_field.argtypes = (ct.c_size_t, ct.c_size_t, ct.c_size_t, ct.c_double, ct.c_double, ct.c_double, ct.c_double, cplx_ndptr, real_ndptr, real_ndptr, real_ndptr, cplx_ndptr, cplx_ndptr);
-    
+    libpropagation.propagate_field.argtypes = (ct.c_size_t, ct.c_size_t, ct.c_size_t, ct.c_double, ct.c_double, ct.c_double, ct.c_double, cplx_ndptr, real_ndptr, real_ndptr, real_ndptr, cplx_ndptr, cplx_ndptr, real_ndptr, ct.c_bool);
+
     # Don't use the ODE method if it is not available, i.e. if we compiled
     # without GSL dependence.
     try:
         libpropagation.propagate_field_ODE.restype = ct.c_int;
         libpropagation.propagate_field_ODE.argtypes = (ct.c_size_t, ct.c_size_t, ct.c_double, ct.c_double, ct.c_double, ct.c_double, cplx_ndptr, real_ndptr, real_ndptr, real_ndptr, real_ndptr, ct.c_double, ct.c_double);
-        can_propagate_using_ODE = True;
+        can_propagate_using_ODE = True; #HARDCODED
     except:
         print("ODE method not compiled into the C library.",file=sys.stderr);
     try:
@@ -66,8 +68,24 @@ try: # to load the C library for propagation.
     except:
         pass;
 
-except OSError: # Fall back to the python implementation
+except OSError as e: # Fall back to the python implementation
+    print(e,file=sys.stderr);
     print("Not using the C propagation library (compile it with make). Propagation will be slow.",file=sys.stderr);
+
+
+def linterp(t_pulse,y_pulse,t_prob):
+    pulse = scipy.interpolate.interp1d(t_pulse, y_pulse);
+    p = pulse(t_prob)
+    p[t_prob<t_pulse[0]] = 0;
+    p[t_prob>t_pulse[-1]] = 0;
+    return p;
+
+def plotlinterp(t_new,alpha,t0,y0):
+    y_new=numpy.zeros(t_new.size)
+    for i in range(len(t_new)):
+        y_new[i]=y0[i]+alpha[i]*(t_new[i]-t0[i])
+    plt.plot(t_new,y_new)
+    plt.show()
 
 
 def transfer_JKM(J,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=True):
@@ -93,7 +111,7 @@ def transfer_JKM(J,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=True):
 
 
 
-def transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=True,abstol=1e-8,reltol=1e-8):
+def transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,xc_filename,use_ODE=True,abstol=1e-8,reltol=1e-8):
      ''' Calculate the wave function after a laser pulse acting on a molecule
      in the state \sum_J C_J|KM>.
 
@@ -110,30 +128,31 @@ def transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=True,
               fastest, particularly for short pulses.
      abstol,reltol: absolute and relative total error tolerances for the
                     propagation over the pulse. The larger the tolerance
-                    for error, the faster the execution time. 
+                    for error, the faster the execution time.
                     Only used when use_ODE is True.
      '''
+
      A = molecule.A;
      B = molecule.B;
+     D = molecule.D;
      delta_alpha = molecule.delta_alpha;
      alpha_perp = molecule.alpha_perp_volume
-     
+
      hbar=1.05457173e-34;
      c = 299792458.0;
 
      sigma = FWHM/(2*sqrt(2*log(2)));
 
      Js = numpy.arange(0.0,Jmax+1,1);
-     E_rot = B*Js*(Js+1) + (A-B)*K**2; # *hbar / hbar for solver
+     E_rot = B*Js*(Js+1) + (A-B)*K**2 - D*(Js*(Js+1))**2; # *hbar / hbar for solver
 
      # Note: since V and E_0_max ends up getting multiplied together,
      # 2 factors of epsilon_0 cancels
      # (since alpha is given in polarizability volume in Angstrom^3 =
      # 1/4pi epsilon_0 times polarizability )
      # Therefore, these factors are skipped.
-    
      E_0_squared_max = 2*peak_intensity/c;
-
+     
      if (not can_propagate_using_ODE):
          use_ODE = False;
 
@@ -144,21 +163,21 @@ def transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=True,
         V0, V1, V2, eig, vec = interaction.interaction_matrix_div_E0_squared(Jmax,K,M,KMsign,delta_alpha,alpha_perp,diagonalize=True);
         # Divide by hbar for solver
         eig = eig*4*pi*1e-30/hbar
-        psi_t = propagate(psi,t,E_rot,E_0_squared_max,sigma,eig,vec);
+        psi_t = propagate(psi,t,E_rot,E_0_squared_max,sigma,eig,vec,xc_filename);
      else:
         V0, V1, V2 = interaction.interaction_matrix_div_E0_squared(Jmax,K,M,KMsign,delta_alpha,alpha_perp,diagonalize=False);
         V0 = V0*4*pi*1e-30/hbar; # Divide by hbar for solver
         V1 = V1*4*pi*1e-30/hbar;
         V2 = V2*4*pi*1e-30/hbar;
-        psi_t = propagate_ODE(psi,t,E_rot,E_0_squared_max,sigma,V0,V1,V2,abstol,reltol);
+        psi_t = propagate_ODE(psi,t,E_rot,E_0_squared_max,sigma,V0,V1,V2,xc_filename,abstol,reltol);
 
      return psi_t;
 
 
-def propagate(psi_0,time,E_rot,E_0_squared_max,sigma,eig,vec):
+def propagate(psi_0,time,E_rot,E_0_squared_max,sigma,eig,vec,xc_filename):
      ''' Propagate the wave function psi_0 (given as coefficients)
      through a gaussian laser pulse centered at time t = 0.
-     
+
      psi_0: initial wave function
      time: array of timesteps to integrate. psi_0 is given at time[0].
            The time step must be constant!
@@ -166,8 +185,9 @@ def propagate(psi_0,time,E_rot,E_0_squared_max,sigma,eig,vec):
      E_0_squared_max: Max value of the square of the E field during pulse
      sigma: temporal variance of the gaussian
      eig, vec: diagonalized interaction matrix V = vec * diag(eig) * vec.T
-     
+
      '''
+
      if (numpy.any(numpy.abs(numpy.diff(numpy.diff(time)))>1e-20)):
          raise RuntimeError("Pulse time steps must be equidistant.");
 
@@ -183,15 +203,32 @@ def propagate(psi_0,time,E_rot,E_0_squared_max,sigma,eig,vec):
          dt = dt/scale;
      else:
          scale = 1;
-    
+
+     customPulse=numpy.empty(time.size)
+     use_custom_pulse=False
+
+
+     if os.path.isfile(xc_filename):
+         pulse_data = numpy.genfromtxt(xc_filename, delimiter=",");
+         pulse_data[:,0] *= 1e-12;
+         pulse_data[:,1] /= numpy.trapz(pulse_data[:,1],pulse_data[:,0]);
+         fluence = E_0_squared_max/1e12; # 1e12 is because we normalize _after_ converting to seconds
+         pulse_data[:,1] *= fluence;
+         
+         customPulse=linterp(pulse_data[:,0],pulse_data[:,1],time)
+         use_custom_pulse=True
+    #     scale=1
+
      expRot = numpy.exp(-1j*dt*E_rot);
      expRot2 = numpy.exp(-1j*dt*E_rot/2);
-    
+
      psi_t = numpy.empty((len(time),len(psi_0)), dtype=numpy.complex)
      psi_t[0,:] = psi_0;
      vecT = numpy.ascontiguousarray(vec.T);
+
      if (libpropagation):
-         res = libpropagation.propagate_field(len(time),scale,len(psi_0),time[0],dt,E_0_squared_max,sigma,psi_t,eig,vec,vecT,expRot,expRot2);
+         #res = libpropagation.propagate_field(len(time), scale, len(psi_0), time[0], dt, E_0_squared_max, sigma, psi_t, alpha, t0, y0, eig, vec, vecT, expRot, expRot2);
+         res = libpropagation.propagate_field(len(time),scale,len(psi_0),time[0],dt,E_0_squared_max,sigma,psi_t,eig,vec,vecT,expRot,expRot2,customPulse,use_custom_pulse);
          if (res != 0):
              raise RuntimeError("Basis size too small");
      else:
@@ -203,19 +240,19 @@ def propagate(psi_0,time,E_rot,E_0_squared_max,sigma,eig,vec):
                 if (k > 0): # Double half step:
                     psi_t[i,:] = expRot*psi_t[i,:];
                 tp = t+k*dt;
-                E_0_squared = E_0_squared_max * numpy.exp(-(tp**2)/(2*sigma**2)); 
+                E_0_squared = E_0_squared_max * numpy.exp(-(tp**2)/(2*sigma**2));
                 psi_t[i,:] = ((numpy.exp(-dt*E_0_squared*1j*eig))*vec).dot(vecT.dot(psi_t[i,:]));
                 if (numpy.max(numpy.abs(psi_t[i,-2:])**2) > 1e-5):
                     raise RuntimeError("Basis size too small");
             psi_t[i,:] = expRot2*psi_t[i,:];
             i = i + 1;
- 
+
      return psi_t;
 
-def propagate_ODE(psi_0,time,E_rot,E_0_squared_max,sigma,V0,V1,V2,abstol=1e-8,reltol=1e-8):
+def propagate_ODE(psi_0,time,E_rot,E_0_squared_max,sigma,V0,V1,V2,xc_filename,abstol=1e-8,reltol=1e-8):
      ''' Same as propagate, except it uses an ODE solver instead
      of the matrix method.
-     
+
      psi_0: initial wave function
      time: array of timesteps to integrate. psi_0 is given at time[0].
            The time step must be constant!
@@ -225,7 +262,7 @@ def propagate_ODE(psi_0,time,E_rot,E_0_squared_max,sigma,V0,V1,V2,abstol=1e-8,re
      V0,V1,V2: the three bands of the symmetric 5 diagonal interaction matrix,
                V0 being the diagonal.
      abstol, reltol: Error tolerances used for the ODE solver.
-     
+
      '''
      if (numpy.any(numpy.abs(numpy.diff(numpy.diff(time)))>1e-20)):
          raise RuntimeError("Pulse time steps must be equidistant.");
@@ -240,10 +277,10 @@ def propagate_ODE(psi_0,time,E_rot,E_0_squared_max,sigma,V0,V1,V2,abstol=1e-8,re
 
      if (res != 0):
          raise RuntimeError("Basis size too small");
- 
+
      return psi_t;
 
-def fieldfree_propagation(psi_0,t0,times,E_rot,Jmax,K,M,KMsign,do_cos2d=False):
+def fieldfree_propagation(psi_0,t0,times,E_rot,Jmax,K,M,KMsign,D,do_cos2d=False):
 
      U, Udiag, U1, U2 = interaction.MeanCos2Matrix(Jmax,K,M,KMsign);
      cos2d = numpy.array([]);
@@ -251,18 +288,23 @@ def fieldfree_propagation(psi_0,t0,times,E_rot,Jmax,K,M,KMsign,do_cos2d=False):
         U2d = U2dcalc.MeanCos2dMatrix(Jmax,K,M,KMsign);
      else:
         U2d = numpy.array([]);
-    
+
      if (libpropagation and Jmax>0): # Call a C function instead of using numpy.
         psi = numpy.empty((len(times),Jmax+1),dtype=numpy.complex);
         cos2 = numpy.empty((len(times),),dtype=numpy.double);
         if (do_cos2d):
             cos2d = numpy.empty((len(times),),dtype=numpy.double);
-        libpropagation.fieldfree_propagation(K,M,Jmax,psi_0,t0,len(times),times,E_rot,Udiag,U1,U2,psi,cos2,do_cos2d,U2d,cos2d);
+    
+        if (D > 0): #do we have centrifugal distortion?
+            libpropagation.fieldfree_propagation(K,M,Jmax,psi_0,t0,len(times),times,E_rot,Udiag,U1,U2,psi,cos2,do_cos2d,U2d,cos2d, 1);
+        else:
+            libpropagation.fieldfree_propagation(K,M,Jmax,psi_0,t0,len(times),times,E_rot,Udiag,U1,U2,psi,cos2,do_cos2d,U2d,cos2d, 0);
+
         return psi,cos2,cos2d;
-    
-     phase = exp(-1j*numpy.outer(E_rot,(times-t0)));
+
+     phase = exp(-1j*numpy.outer(E_rot,(times-t0))); #should work with centrifugal dist
      psi = psi_0.reshape(Jmax+1,1)*phase;
-    
+
      # We only need the diagonal in psi^H x U x psi.
      # since diag(AxB) = [sum A1j*Bj1, sum A2j*Bj2 ...] =
      # [sum A^Tj1*Bj1, sum A^Tj2*Bj2 ...] = A^T*B summed along the colums
@@ -273,4 +315,3 @@ def fieldfree_propagation(psi_0,t0,times,E_rot,Jmax,K,M,KMsign,do_cos2d=False):
      psi=numpy.transpose(psi);
 
      return psi,cos2,cos2d; # psi[t][n] contains n'th component at time index t
-
