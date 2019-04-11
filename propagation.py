@@ -290,8 +290,8 @@ def fieldfree_propagation(psi_0,t0,times,E_rot,Jmax,K,M,KMsign,D,do_cos2d=False)
         U2d = numpy.array([]);
 
      if (libpropagation and Jmax>0): # Call a C function instead of using numpy.
-        psi = numpy.empty((len(times),Jmax+1),dtype=numpy.complex);
-        cos2 = numpy.empty((len(times),),dtype=numpy.double);
+        psi = numpy.zeros((len(times),Jmax+1),dtype=numpy.complex);
+        cos2 = numpy.zeros((len(times),),dtype=numpy.double);
         if (do_cos2d):
             cos2d = numpy.empty((len(times),),dtype=numpy.double);
     

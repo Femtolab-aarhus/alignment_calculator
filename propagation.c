@@ -292,11 +292,13 @@ void fieldfree_propagation(int K, int M, const size_t Jmax, const double complex
 
            if (centrifugalDist) {
                for (J = 0; J <= Jmax; J++) { // Propagate wave function, with centrifugal distortion
-                    if (cabs(psi_0[J]) > 1e-5) {
-                         phase = cexp(-E_rot[J]*Dt*I); //skp empty Js
-                    } else {
-                         phase = 1.0;
-                    }
+                    if (cabs(psi_0[J]) < 1e-5) {
+                         continue; 
+                         }
+                         phase = cexp(-E_rot[J]*Dt*I); //skip empty Js
+                    //} //else {
+                      //   phase = 1.0;
+                //    }
                     psi_result[i][J] = psi_0[J]*phase;
                }
           }
