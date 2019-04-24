@@ -40,6 +40,7 @@ def dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_
     print("xc_filename = ",xc_filename)
     print("do_psi_pulse = ",do_psi_pulse)
     print("verbose = ",verbose)
+    print("Using  n CPUs = ",max(multiprocessing.cpu_count()-1, 1))
 
     if (t_end < 0):
         B = molecule.B;
@@ -53,8 +54,7 @@ def dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_
     focalvolume_weight,focal_pulses = trace_backend.focal_volume_average(pulses,Nshells,probe_waist);
 
     dispatcher_started_time = time.time();
-    with multiprocessing.Pool(min(multiprocessing.cpu_count()-1, 1)) as p:
-
+    with multiprocessing.Pool(7) as p:
         num_total = len(states)*Nshells;
         chunksize = max(1,int(num_total/multiprocessing.cpu_count()/10));
 
