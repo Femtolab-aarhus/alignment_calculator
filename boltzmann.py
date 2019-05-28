@@ -34,6 +34,7 @@ def thermal_JKM_ensemble(T,molecule,Jmax,percentile=0.999,anisotropy=1.0):
 
     A = molecule.A;
     B = molecule.B;
+    D = molecule.D;
 
     if (T == 0):
         if (molecule.even != 0):
@@ -62,7 +63,11 @@ def thermal_JKM_ensemble(T,molecule,Jmax,percentile=0.999,anisotropy=1.0):
 
 
     K, J = numpy.meshgrid(Ks,Js);
-    E_rot = (B*J*(J+1) + (A-B)*K**2)*hbar;
+    E_rot = (B*J*(J+1) + (A-B)*K**2 - D*(J*(J+1))**2) * hbar; 
+
+    #check if rotational levels are sane
+    if (numpy.any(numpy.diff(E_rot, axis=0)<0)):
+        raise RuntimeError("Unphysical rotational energy levels")
 
     E_rot[K>J] = numpy.inf; # Remove unphysical K values by giving them infinite
                             # energy.
@@ -119,4 +124,4 @@ def thermal_JKM_ensemble(T,molecule,Jmax,percentile=0.999,anisotropy=1.0):
     for state in states:
         state[0]/=total_weight; # Renormalize the weighting.
 
-    return states;
+    return list(reversed(states)); #reversed, so that JMax errors happen faster

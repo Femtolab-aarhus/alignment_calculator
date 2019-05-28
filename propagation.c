@@ -42,6 +42,21 @@ static inline double pulse(double t, double amplitude, double sigma_sq) {
      return amplitude*exp(-t*t/(2*sigma_sq));
 }
 
+//fac = -pulse_interp(Nsteps,i,t,alpha,x0,y0)*dt;
+
+static inline double pulse_interp(size_t i, size_t k, size_t Nsteps, size_t Nsteps_inner, const double customPulse[Nsteps]) {
+     if (i < Nsteps) {
+         return customPulse[i] + (customPulse[i+1]-customPulse[i])*((double)k/(double)Nsteps_inner); //actually do some interpolating
+     } else {
+        return customPulse[i]; //in case we run off the end
+    } 
+}
+
+/* static inline double pulse_interp(size_t Nsteps, size_t i, double t, double alpha[Nsteps], double x0[Nsteps], double y0[Nsteps]) {
+    // return alpha[i]*(t-x0[i])+y0[i];
+	return alpha[i]; //let's not bother with the linear slope thingy
+} */
+
 // Fast matrix-vector multiplication when the matrix is symmetric 5-diagonal
 static inline void fast2band(const size_t N, const double diag[N], const double band1[N-1], const double band2[N-2], double complex out[N], const double complex in[N]) {
 
@@ -51,7 +66,7 @@ static inline void fast2band(const size_t N, const double diag[N], const double 
      out[0] = diag[0]*in[0] + band1[0]*in[1] + band2[0]*in[2];
 
      out[1] = diag[1]*in[1] + band1[0]*in[0] + band1[1]*in[2] + band2[1]*in[3];
-     
+
      for (i = 2; i < N-2; i++) {
           out[i] = diag[i]*in[i]+band1[i]*in[i+1]+band1[i-1]*in[i-1]+band2[i]*in[i+2]+band2[i-2]*in[i-2];
      }
@@ -60,7 +75,7 @@ static inline void fast2band(const size_t N, const double diag[N], const double 
                 band1[N-3]*in[N-3] + band1[N-2]*in[N-1];
      out[N-1] = diag[N-1]*in[N-1] + band1[N-2]*in[N-2] + band2[N-3]*in[N-3];
 
-     } else { // N <= 3 
+     } else { // N <= 3
           for (i = 0; i < N; i++) out[i] = diag[i]*in[i];
           if (N == 2) {
                out[0] += in[1]*band1[0];
@@ -96,7 +111,7 @@ void fast1band(const size_t N, const double diag[N], const double band[N-1], dou
 
 
 
-// nc: no clobber, i.e. no overwriting of the input vector. 
+// nc: no clobber, i.e. no overwriting of the input vector.
 static inline void matvec_nc(const size_t N, const double mat[N][N], double complex out[N], const double complex vec[N]) {
 
      size_t i,j,k;
@@ -112,7 +127,7 @@ static inline void matvec_nc(const size_t N, const double mat[N][N], double comp
      double complex tmp[num_rows];
 
      const size_t remaining_rows = N%num_rows;
-     
+
      for (i = 0; i < N-remaining_rows; i+=num_rows) {
           for (k = 0; k < num_rows; k++) tmp[k]=0;
           for (j = 0; j < N; j++) {
@@ -124,7 +139,7 @@ static inline void matvec_nc(const size_t N, const double mat[N][N], double comp
                out[i+k] = tmp[k];
           }
      }
-     // Do the remaining rows  
+     // Do the remaining rows
      for (k = 0; k < remaining_rows; k++) tmp[k]=0;
      for (j = 0; j < N; j++) {
           for (k = 0; k < remaining_rows; k++) {
@@ -247,7 +262,7 @@ static inline void upscale(const size_t dim, const size_t jmax, const unsigned i
 } */
 
 
-void fieldfree_propagation(int K, int M, const size_t Jmax, const double complex psi_0[Jmax+1], double t0, size_t num_times, const double times[num_times], const double E_rot[Jmax+1], const double Udiag[Jmax+1], const double Uband1[Jmax], const double Uband2[Jmax-1], double complex psi_result[num_times][Jmax+1], double cos2[num_times], const _Bool do_cos2d, const double U2d[Jmax+1][Jmax+1], double cos2d[num_times]) {
+void fieldfree_propagation(int K, int M, const size_t Jmax, const double complex psi_0[Jmax+1], double t0, size_t num_times, const double times[num_times], const double E_rot[Jmax+1], const double Udiag[Jmax+1], const double Uband1[Jmax], const double Uband2[Jmax-1], double complex psi_result[num_times][Jmax+1], double cos2[num_times], const _Bool do_cos2d, const double U2d[Jmax+1][Jmax+1], double cos2d[num_times], int centrifugalDist) {
 
      size_t i;
      double t, Dt;
@@ -271,40 +286,48 @@ void fieldfree_propagation(int K, int M, const size_t Jmax, const double complex
      double complex U2d_psi[dim], psi_downscaled[dim];
 
      for (i = 0; i < num_times; i++) {
-     
+
           t = times[i];
           Dt = t-t0;
 
-          /*
-          for (J = 0; J <= Jmax; J++) { // Propagate wave function
-               phase = cexp(-E_rot[J]*Dt*I);
-               psi_result[i][J] = psi_0[J]*phase;
-          }*/
-
-          // The same as the commented out code,
-          // but exploits the Bj(j+1) structure of the energy levels.
-          // exp(-i*B*j*(j+1)) = exp(-i*B*j*(j-1)*exp(-2Bj*i)
-          // = exp(-i*B*j*(j-1)*exp(-2B*i)^j,
-          // i.e. phase(j) = phase(j-1)*exp(-2B*i)^j
-          // This avoids the very costly evaluation of cexp() multiple times.
-          // Note: It won't work if you want to implement centrifugal
-          // distorsion.
-          
-          phase_incr_base = cexp(remainder(-2*Bconst*Dt,2*M_PI)*I);
-          phase_incr = 1;
-          phase = cexp(-E_rot[0]*Dt*I);
-          psi_result[i][0] = psi_0[0]*phase;
-          for (J = 1; J <= Jmax; J++) {
-               phase_incr *= phase_incr_base;
-               phase *= phase_incr;
-               psi_result[i][J] = psi_0[J]*phase;
+           if (centrifugalDist) {
+               for (J = 0; J <= Jmax; J++) { // Propagate wave function, with centrifugal distortion
+                    if (cabs(psi_0[J]) < 1e-5) {
+                         continue; 
+                         }
+                         phase = cexp(-E_rot[J]*Dt*I); //skip empty Js
+                    //} //else {
+                      //   phase = 1.0;
+                //    }
+                    psi_result[i][J] = psi_0[J]*phase;
+               }
           }
- 
+          else {
+               // The same as the above code,
+               // but exploits the Bj(j+1) structure of the energy levels.
+               // exp(-i*B*j*(j+1)) = exp(-i*B*j*(j-1)*exp(-2Bj*i)
+               // = exp(-i*B*j*(j-1)*exp(-2B*i)^j,
+               // i.e. phase(j) = phase(j-1)*exp(-2B*i)^j
+               // This avoids the very costly evaluation of cexp() multiple times.
+               // Note: It won't work if you want to implement centrifugal
+               // distorsion.
+
+               phase_incr_base = cexp(remainder(-2*Bconst*Dt,2*M_PI)*I);
+               phase_incr = 1;
+               phase = cexp(-E_rot[0]*Dt*I);
+               psi_result[i][0] = psi_0[0]*phase;
+               for (J = 1; J <= Jmax; J++) {
+                    phase_incr *= phase_incr_base;
+                    phase *= phase_incr;
+                    psi_result[i][J] = psi_0[J]*phase;
+               }
+          }
+
           //U_psi = U dot Psi
           fast2band(Jmax+1, Udiag,Uband1,Uband2, U_psi, psi_result[i]);
           // calculate cos^2 = conj(psi)*U*psi:
           cos2[i] = creal(dot(Jmax+1,psi_result[i],U_psi));
-          
+
           // U2d_psi = U2d dot psi, if U2d is specified
           if (do_cos2d) {
                // U2d_psi = U2d dot psi
@@ -327,13 +350,12 @@ void fieldfree_propagation(int K, int M, const size_t Jmax, const double complex
 
 // Like the python version, except without all the implicit memory allocations
 // and deallocations
-int propagate_field(size_t Nsteps, size_t Nsteps_inner, size_t dim, double t, double dt, double E0_sq_max, double sigma, double complex psi_t[Nsteps][dim], const double eig[dim], const double eigvec[dim][dim], const double eigvecT[dim][dim], const double complex expRot[dim], const double complex expRot2[dim]) {
-     
-
+//int propagate_field(size_t Nsteps, size_t Nsteps_inner, size_t dim, double t, double dt, double E0_sq_max, double sigma, double complex psi_t[Nsteps][dim], double alpha[Nsteps], double x0[Nsteps], double y0[Nsteps], const double eig[dim], const double eigvec[dim][dim], const double eigvecT[dim][dim], const double complex expRot[dim], const double complex expRot2[dim]) {
+int propagate_field(size_t Nsteps, size_t Nsteps_inner, size_t dim, double t, double dt, double E0_sq_max, double sigma, double complex psi_t[Nsteps][dim], const double eig[dim], const double eigvec[dim][dim], const double eigvecT[dim][dim], const double complex expRot[dim], const double complex expRot2[dim], const double customPulse[Nsteps], bool use_custom_pulse) {
      size_t i, j, k;
      double fac;
      double sigma_sq = sigma*sigma;
-     
+
      for (i = 1; i < Nsteps; i++) {
           for (j = 0; j < dim; j++)
                psi_t[i][j] = expRot2[j]*psi_t[i-1][j];
@@ -342,11 +364,16 @@ int propagate_field(size_t Nsteps, size_t Nsteps_inner, size_t dim, double t, do
                     vecvec(dim,psi_t[i],expRot); // psi = expRot*psi;
                //matTvec(dim,eigvec,psi_t[i]); // psi = eigvec^T dot psi
                matvec(dim,eigvecT,psi_t[i]); // psi = eigvec^T dot psi
-               fac = -pulse(t,E0_sq_max,sigma_sq)*dt;
+               if (use_custom_pulse == 1) {
+                    fac = -pulse_interp(i, k, Nsteps, Nsteps_inner, customPulse)*dt;
+               } else {
+                    fac = -pulse(t,E0_sq_max,sigma_sq)*dt;
+               }
+
                t = t + dt;
                for (j = 0; j < dim; j++) // psi = psi*exp(the diagonal)
                     psi_t[i][j] *= cexp(fac*eig[j]*I);
-               
+
                matvec(dim,eigvec,psi_t[i]); // psi = eigvec dot psi
 
                if (fmax(pow(cabs(psi_t[i][dim-2]),2),pow(cabs(psi_t[i][dim-1]),2)) > 1e-5)
@@ -373,7 +400,7 @@ int deriv (double t, const double _psi[], double _dPsidt[], void * params) {
      // Here, we assume a complex is represented by two doubles
      // (e.g. real+imag part, or magnitude and phase) and lie contigously in
      // memory.
- 
+
      struct deriv_params *p = params;
      size_t j;
      const size_t dim = p->dim;
@@ -416,7 +443,7 @@ int propagate_field_ODE(size_t Nsteps, const size_t dim, double t, double dt, do
      double t_run = t;
 
      for (i = 1; i < Nsteps; i++) {
-     
+
           memcpy(psi_t[i],psi_t[i-1],sizeof(double complex)*dim);
           gsl_odeiv2_driver_apply(d,&t_run,t+(double)i*dt,(double *) psi_t[i]);
 
@@ -439,7 +466,7 @@ int propagate_field_ODE(size_t Nsteps, const size_t dim, double t, double dt, do
 #endif
 
 
-/* Experimentation with krylov subspace method. 
+/* Experimentation with krylov subspace method.
 // Note: Clutters psi
 size_t lanczos_banded(size_t N, size_t m, double complex psi[N], complex double V[m+1][N],  double diag[N], double offdiag[N], double Adiag[N], double band1[N-1], double band2[N-2]) {
 
@@ -449,16 +476,16 @@ size_t lanczos_banded(size_t N, size_t m, double complex psi[N], complex double 
      memcpy(V[0],psi,N*sizeof(complex double));
 
      for (i = 0; i < m; i++) {
-          
+
           // Multiply vector with the matrix
           fast2band(N, Adiag,band1,band2,psi);
 
           if (i > 0) {
                // Project out previous vector
-               for (j = 0; j < N ; j++) 
+               for (j = 0; j < N ; j++)
                     psi[j] -= offdiag[i-1]*V[i-1][j];
           }
-          
+
           // Store overlap with "next previous" vector
           diag[i] = creal(dot(N,V[i],psi));
           // And then project it out
@@ -473,10 +500,10 @@ size_t lanczos_banded(size_t N, size_t m, double complex psi[N], complex double 
                break;
           }
 
-          // Renormalize 
+          // Renormalize
           for (j = 0; j < N; j++)
                psi[j] /= offdiag[i];
-          
+
           memcpy(V[i+1],psi,N*sizeof(complex double));
 
      }

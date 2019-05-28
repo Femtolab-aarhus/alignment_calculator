@@ -44,7 +44,6 @@ import multiprocessing
 import U2dcalc
 import propagation
 
-
 #cmd = sys.executable;
 
 
@@ -55,7 +54,10 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
         self.scratchdir = scratchdir
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self);
-        
+
+        self.update_intensity()
+        self.update_fluence()
+
         self.moleculeConfigFile = "conf/molecules.conf";
 
         _translate = PyQt5.QtCore.QCoreApplication.translate
@@ -66,6 +68,7 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
         self.ui.moleculesBox.setItemText(0,"Load...");
         self.ui.moleculesBox.setCurrentIndex(0);
 
+        self.ui.loadpulse.clicked.connect(self.selectFile)
 
         self.ui.mybutn.clicked.connect(self.Go);
         self.ui.saveTrace.triggered.connect(self.saveTrace);
@@ -77,7 +80,7 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
         self.ui.moleculesBox.activated.connect(self.moleculeSelected);
         self.ui.alpha_par.textChanged.connect(self.calculateDalpha);
         self.ui.alpha_perp.textChanged.connect(self.calculateDalpha);
-        
+
         self.ui.Aconst.textChanged.connect(self.update_num_states);
         self.ui.Bconst.textChanged.connect(self.update_num_states);
         self.ui.Bconst.textChanged.connect(self.update_timestep);
@@ -86,8 +89,20 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
         self.ui.abundanceOdd.textChanged.connect(self.update_num_states);
         self.ui.percentile.textChanged.connect(self.update_num_states);
         self.ui.forceDT.clicked.connect(self.force_timestep_click);
+        self.ui.choosePropTime.clicked.connect(self.choosePropTime_click);
         self.ui.Jmax.textChanged.connect(self.update_timestep);
         self.ui.cos2d.clicked.connect(self.update_timestep);
+
+        self.ui.pulseEnergy.textChanged.connect(self.update_intensity);
+        self.ui.pulseDuration.textChanged.connect(self.update_intensity);
+        self.ui.pumpWaist.textChanged.connect(self.update_intensity);
+
+        self.ui.pulseEnergy.textChanged.connect(self.update_fluence);
+        self.ui.pumpWaist.textChanged.connect(self.update_fluence);
+        self.ui.pulseEnergy_2.textChanged.connect(self.update_fluence);
+        self.ui.pumpWaist_2.textChanged.connect(self.update_fluence);
+        self.ui.PulseTab.currentChanged.connect(self.changed_tab);
+
 
         if (not propagation.can_propagate_using_ODE):
             self.ui.doODE.setEnabled(False);
@@ -99,10 +114,11 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
         self.ensemble = [];
 
         self.show();
-    
+
     def update_num_states(self,checked=0):
         A = default("0",self.ui.Aconst.text());
         B = self.ui.Bconst.text();
+        D = default("0",self.ui.Dconst.text());
         T = default("0",self.ui.Temperature.text());
         even = default("1",self.ui.abundanceEven.text());
         odd = default("1",self.ui.abundanceOdd.text());
@@ -111,6 +127,7 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
         try:
             A = 2*numpy.pi*1e9*float(A);
             B = 2*numpy.pi*1e9*float(B);
+            D = 2*numpy.pi*1e3*float(D);
             T = float(T);
             even = float(even);
             odd = float(odd);
@@ -119,6 +136,7 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
             m = config.molecule("MOL");
             m.A = A;
             m.B = B;
+            m.D = D;
             m.even = even;
             m.odd = odd;
             if (T >= 0 and even >= 0 and odd >= 0 and even+odd != 0 and percentile > 0 and percentile < 1):
@@ -149,17 +167,77 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
             except:
                 pass;
 
+        if (not self.ui.propTime.isEnabled()):
+            try:
+                B = float(self.ui.Bconst.text());
+                endTime = 1000*(1/(2*B))*1.1;
+                self.ui.propTime.setText('%.2f' % endTime);
+            except:
+                pass
+
+    def update_intensity(self):
+        try:
+            E=default("100",self.ui.pulseEnergy.text())
+            fwhm=default("300",self.ui.pulseDuration.text())
+            w0=default("35",self.ui.pumpWaist.text())
+            E=float(E)*1e-6
+            fwhm=float(fwhm)*1e-15
+            w0=float(w0)*1e-6
+            I0=4*numpy.sqrt(numpy.log(2))*E/(numpy.pi**(3.0/2)*fwhm*w0**2)*1e-16
+            self.ui.pulseIntensity.setText('%.1f' % I0);
+        except:
+            pass;
+
+    def update_fluence(self):
+        try:
+            E=default("100",self.ui.pulseEnergy.text())
+            w0=default("35",self.ui.pumpWaist.text())
+            E=float(E)*1e-6
+            w0=float(w0)*1e-6
+            F=2*E/(numpy.pi*w0**2)*1e-4
+            self.ui.pulseFluence.setText('%.1f' % F);
+
+            E_2=default("100",self.ui.pulseEnergy_2.text())
+            w0_2=default("35",self.ui.pumpWaist_2.text())
+            E_2=float(E_2)*1e-6
+            w0_2=float(w0_2)*1e-6
+            F_2=2*E_2/(numpy.pi*w0_2**2)*1e-4
+            self.ui.pulseFluence_2.setText('%.1f' % F_2);
+        except:
+            pass;
+
+    def selectFile(self):
+        diag = QFileDialog(self);
+        diag.setAcceptMode(QFileDialog.AcceptOpen) #Save file, not open one
+        diag.setNameFilter("Comma Separated Values (*.csv);;Space separated Values (*.csv)");
+        diag.setDefaultSuffix("csv"); # Make sure selected files end in .csv
+        diag.exec();
+        filname = diag.selectedFiles()[0]
+        self.ui.currentFile.setText(filname);
 
     def force_timestep_click(self,checked):
         self.ui.timestep.setEnabled(checked)
-    
+
+    def choosePropTime_click(self,checked):
+        self.ui.propTime.setEnabled(checked)
+        self.update_timestep()
+
     def doODE_click(self,checked):
         if (checked):
             os.environ["ALIGNMENT_CALC_MAY_USE_ODE_SOLVER"] = "YES";
+
     def doMatrix_click(self,checked):
         if (checked):
             os.environ["ALIGNMENT_CALC_MAY_USE_ODE_SOLVER"] = "NO";
 
+    def changed_tab(self, event):
+        if (self.ui.PulseTab.currentIndex() == 0):
+            if (propagation.can_propagate_using_ODE): 
+                self.ui.doODE.setEnabled(True);
+        else:
+            self.ui.doODE.setEnabled(False) #ODE doesn't support custom pulses
+            self.ui.doMatrix.setChecked(True);
+            os.environ["ALIGNMENT_CALC_MAY_USE_ODE_SOLVER"] = "NO";
 
     def closeEvent(self, event):
         self.close_figs();
@@ -203,7 +281,7 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
     def enable_Go_button(self):
         self.ui.mybutn.setEnabled(True);
         self.ui.mybutn.setText('Go!');
-    
+
     def disable_save_option(self):
         self.ui.saveTrace.setEnabled(False);
     def enable_save_option(self):
@@ -227,7 +305,7 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
         else:
             QMessageBox.critical(self,'Validation error',message);
         raise ValueError(message);
-    
+
     def validator_to_float(self,field,num):
         try:
             val = float(num);
@@ -237,7 +315,7 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
         except ValueError:
             self.validation_error(field + " must be a nonnegative number.");
             raise
- 
+
     def validator_to_int(self,field,num):
         try:
             val = int(num);
@@ -247,7 +325,7 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
         except ValueError:
             self.validation_error(field + " must be a nonnegative integer.");
             raise
-            
+
     def validator_to_floats(self,field,nums,n_floats=0):
         try:
             vals = [float(num) for num in nums.split(",")]
@@ -269,21 +347,39 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
             raise ValueError()
 
     def validate_input(self):
-        try: 
+        try:
             p = dict()
             Aconst = default("0",self.ui.Aconst.text());
             Bconst = self.ui.Bconst.text()
+            Dconst = default("0",self.ui.Dconst.text());
             alpha_par = self.ui.alpha_par.text()
             alpha_perp = self.ui.alpha_perp.text()
+            propTime = self.ui.propTime.text()
+
+            pulse_tab_state = self.ui.PulseTab.currentIndex()
+            if (pulse_tab_state == 0):
+                I0 = default("16.3",self.ui.pulseIntensity.text())
+                pumpWaist = default("35",self.ui.pumpWaist.text())
+                xc_filename=''
+            elif (pulse_tab_state == 1): # State for custom pulse
+          #      self.ui.doODE.
+                I0 = default("5.2",self.ui.pulseFluence_2.text()) # IMPORTANT: fluence is treated as if it is I0 until propagation.py self.ui.pulseEnergy_2.text()
+               # I0 = default("5.2",self.ui.pulseEnergy_2.text())
+                pumpWaist = default("35",self.ui.pumpWaist_2.text())
+                xc_filename=default(" ",str(self.ui.currentFile.text()))
+                if os.path.isfile(xc_filename) is not True:
+                    self.validation_error("No or invalid pulse file specified")
+            else:
+                self.validation_error("Invalid initial state of pulse tab");
+
             FWHM = default("300",self.ui.pulseDuration.text())
-            I0 = default("10",self.ui.pulseIntensity.text())
-            pumpWaist = default("35",self.ui.pumpWaist.text())
-            probeWaist = default("25",self.ui.probeWaist.text())
+            t0 = default("0",self.ui.t0.text());
             Nshells = default("1",self.ui.Nshells.text());
             if (Nshells == "0"):
                 self.ui.Nshells.setText("1");
                 Nshells = "1";
-            t0 = default("0",self.ui.t0.text());
+            probeWaist = default("25",self.ui.probeWaist.text())
+
             Jmax = default("140",self.ui.Jmax.text());
             temperature = default("0",self.ui.Temperature.text());
             abundanceEven = default("1",self.ui.abundanceEven.text());
@@ -295,14 +391,15 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
             M = default("0",self.ui.M.text());
             cos2d = self.ui.cos2d.isChecked();
 
-            p["Aconst"] = self.validator_to_float("A constant",Aconst)
+            p["Aconst"] = self.validator_to_float("A constant", Aconst)
             p["Bconst"] = self.validator_to_float("B constant", Bconst)
+            p["Dconst"] = self.validator_to_float("D constant", Dconst)
             p["a_par"] = self.validator_to_float("Parallel polarizability", alpha_par)
             p["a_perp"] = self.validator_to_float("Perpendicular polarizability", alpha_perp)
 
             p["t0"] = [i*1e-12 for i in self.validator_to_floats("T0",t0)]
             num_pulses = len(p["t0"]);
-    
+
             p["I_0"] = [i*1e16 for i in self.validator_to_floats("Peak intensity", I0,num_pulses)];
             p["FWHM"] = [i*1e-15 for i in self.validator_to_floats("Pulse duration", FWHM, num_pulses)];
 
@@ -313,10 +410,10 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
             p["probeWaist"] = self.validator_to_float("Probe waist",probeWaist);
             p["Nshells"] = self.validator_to_int("#FVA shells",Nshells);
             p["Jmax"] = self.validator_to_int("Jmax",Jmax);
-    
+
             if (p["pumpWaist"] == 0 or p["probeWaist"] == 0):
                 self.validation_error("Waist size must be larger than 0.");
-            
+
             initial_state = self.ui.InitConditionsTab.currentIndex();
             p["Boltzmann"] = False;
             p["singleState"] = False;
@@ -346,15 +443,16 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
                     self.validation_error("Triangle inequality violated.");
             else:
                 self.validation_error("Invalid initial state tab");
-    
+
             p["cos2d"] = cos2d;
-    
+
             if (self.ui.forceDT.isChecked()):
                 dt = default("0",self.ui.timestep.text());
                 dt = self.validator_to_float("Time step",dt);
                 p["dt"] = dt;
 
-
+            p["propTime"] = self.validator_to_float("Propagation time", propTime)
+            p["xc_filename"] = xc_filename
 
             return p;
         except ValueError:
@@ -369,8 +467,8 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
             self.last_result = self.calc.result;
             self.enable_save_option();
             self.present_results();
-    
-    
+
+
     def present_results(self):
         npzfile = self.last_result;
         t = npzfile["t"];
@@ -438,7 +536,7 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
             npzfile = self.last_result;
             t = npzfile["t"];
             cos2 = npzfile["cos2"];
-            cos2d = npzfile["cos2d"];                
+            cos2d = npzfile["cos2d"];
             extra_header = [];
             extra_columns = [];
             if ('Javg' in npzfile.keys()):
@@ -454,13 +552,14 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
 
             utils.save_to_csv(filename,t,cos2,cos2d,extra_header,extra_columns,delimiter);
 
-    
+
     def moleculeSelected(self,index):
         if (index != 0):
             name = self.ui.moleculesBox.itemText(index);
             molecule = config.molecule(name,self.moleculeConfigFile);
             self.ui.Aconst.setText(str(molecule.A_raw));
             self.ui.Bconst.setText(str(molecule.B_raw));
+            self.ui.Dconst.setText(str(molecule.D_raw));
             self.ui.alpha_par.setText(str(molecule.alpha_par_volume));
             self.ui.alpha_perp.setText(str(molecule.alpha_perp_volume));
             self.ui.abundanceEven.setText(str(molecule.even));
@@ -472,8 +571,8 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
             self.ui.alpha_perp.setText("");
             self.ui.abundanceEven.setText("");
             self.ui.abundanceOdd.setText("");
- 
-            
+
+
 
     def calculateDalpha(self):
 
@@ -484,8 +583,8 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
                 a_par = "0";
             if (a_perp == ""):
                 a_perp = "0";
-            
-            
+
+
             self.ui.deltaAlpha.setText(str(round(float(a_par)-float(a_perp),5)));
         except ValueError:
             self.ui.deltaAlpha.setText("");
@@ -515,7 +614,7 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
 
         Kmax = max([0] + [m[2] for m in ensemble]);
         Mmax = max([0] + [m[3] for m in ensemble]);
-            
+
         q = precalculateWidget(self,Jmax,Kmax,Mmax)
 
     def help(self):
@@ -554,7 +653,7 @@ class precalculateWidget(PyQt5.QtWidgets.QDialog):
         self.ui.Jmax.textChanged.connect(self.update_size_req);
         self.ui.Kmax.textChanged.connect(self.update_size_req);
         self.ui.Mmax.textChanged.connect(self.update_size_req);
-        
+
         self.update_size_req();
         self.update_available();
         self.show();
@@ -607,7 +706,7 @@ class precalculateWidget(PyQt5.QtWidgets.QDialog):
             return inputs;
         except:
             return False;
-    
+
     def update_size_req(self):
         inputs = self.validate_input();
         if (inputs):
@@ -660,7 +759,7 @@ class calculatron(QThread):
             p["abundanceOdd"] = 1;  # These are not actually used when
             p["abundanceEven"] = 1; # not doing boltzmann averaging
         conffile_text  = "[MOL]\n"
-        conffile_text += "A = {}\nB = {}\n".format(p["Aconst"],p["Bconst"])
+        conffile_text += "A = {}\nB = {}\nD = {}\n".format(p["Aconst"],p["Bconst"],p["Dconst"])
         conffile_text += "alpha_par_volume = {}\n".format(p["a_par"])
         conffile_text += "alpha_perp_volume = {}\n".format(p["a_perp"])
         conffile_text += "odd = {}\neven = {}\n\n".format(p["abundanceOdd"],p["abundanceEven"])
@@ -668,23 +767,25 @@ class calculatron(QThread):
         conffile_text += "[pulses]\n"
         conffile_text += "I_max = {}\nFWHM = {}\n".format(p["I_0"],p["FWHM"])
         conffile_text += "t = {}\nwaist = {}\n".format(p["t0"],p["pumpWaist"])
-        
+
         conffile.file.write(conffile_text.encode('utf8'))
         conffile.file.flush()
 
     def calculateBoltzmann(self,conffile_name):
         p = self.params;
-        
+
         cmd = self.cmd;
 
         args = [cmd, "./cos2_thermal.py MOL", conffile_name, conffile_name]
-        args += ["-T", p["temperature"], "--Jmax", p["Jmax"]]
+        args += ["-T", p["temperature"], "--Jmax", p["Jmax"], "-t", p["propTime"]]
         args += ["--Nshells", p["Nshells"], "--probe_waist", p["probeWaist"]]
         args += ["--percentile", p["percentile"]];
         args += ["--anisotropy", p["anisotropy"]];
+        if os.path.isfile(p["xc_filename"]):
+            args += ["--xc", p["xc_filename"]];
         if (p["cos2d"]):
             args += ["--cos2d"]
- 
+
         return self.alignment_trace_command(args);
 
     def calculateSingleState(self,conffile_name):
@@ -693,8 +794,10 @@ class calculatron(QThread):
         cmd = self.cmd;
 
         args  = [cmd, "./cos2_calc.py MOL", p["J"], p["K"], p["M"]]
-        args += [conffile_name,conffile_name, "--Jmax",p["Jmax"]]
+        args += [conffile_name,conffile_name, "--Jmax",p["Jmax"],  "-t", p["propTime"]]
         args += ["--Nshells", p["Nshells"], "--probe_waist", p["probeWaist"]]
+        if os.path.isfile(p["xc_filename"]):
+            args += ["--xc", p["xc_filename"]];
         if (p["cos2d"]):
             args += ["--cos2d"]
 
@@ -719,7 +822,7 @@ class calculatron(QThread):
         res = numpy.load(resultfile.name);
         return res;
 
- 
+
 if __name__ == '__main__':
     status = 0;
     with tempfile.TemporaryDirectory() as tmpdirname:
@@ -734,4 +837,3 @@ if __name__ == '__main__':
         del gui;
         gc.collect();
     sys.exit(status);
-

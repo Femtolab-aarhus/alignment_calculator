@@ -1,4 +1,4 @@
-#!/usr/bin/python3 
+#!/usr/bin/python3
 
 #   Copyright 2016 Anders Aspegren Søndergaard / Femtolab, Aarhus University
 #
@@ -47,9 +47,9 @@ if __name__ == "__main__":
     parser.add_argument('--Nshells',nargs=1,default=[1],type=int,help='Number of integration shells to use in focal volume averaging (1 for no focal volume averaging)');
     parser.add_argument('--probe_waist',nargs=1,default=[25.0],type=float,help='Probe waist in µm.');
     parser.add_argument('--cos2d',action="store_true",help='Calculate cos^2 theta 2d (requires the U2d helper program to be compiled, see Makefile)');
-    parser.add_argument('--csv',action="store_true",help='Store results in a CSV file instead of a .npy file');
+    parser.add_argument('--csv',action="store_true",default=False, help='Store results in a CSV file instead of a .npy file');
     parser.add_argument('-f','--filename',nargs=1,default=[""],type=str,help='Output filename. If using .npz format, .npz extension will be appended to the file name if it is not already there.');
-
+    parser.add_argument('--xc',nargs=1,default=[""],type=str,help='.csv file containing cross-correlation. First column should contain time in ps. Second coulumn should contain signal.')
 
     args = parser.parse_args();
 
@@ -66,15 +66,15 @@ if __name__ == "__main__":
         dt = utils.nice_time_step(molecule.B/(2*numpy.pi),Jmax,for_cos2d=calculate_cos2d)
     store_csv = args.csv;
     out_filename = args.filename[0];
-
+    xc_filename = args.xc[0];
     probe_waist = args.probe_waist[0]*1e-6;
 
     t_end = args.t[0]*1e-12;
-    
+
     if (J < 0):
         raise RuntimeError('J must be positive');
 
-   
+
     KMsign = numpy.sign(K*M);
     if (KMsign == 0):
         KMsign = 1;
@@ -84,24 +84,24 @@ if __name__ == "__main__":
 
     if (Mp > J or Kp > J):
         raise RuntimeError('K and M must be less than J');
-    
+
     weight = 1;
     states = [(weight,J,Kp,Mp,KMsign)];
- 
+
     do_psi_pulse = (Nshells == 1);
 
-    t,cos2,cos2d,psi_pulse = dispatcher.dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_cos2d,do_psi_pulse)
+    t,cos2,cos2d,psi_pulse = dispatcher.dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_cos2d,xc_filename,do_psi_pulse)
     psi_pulse = psi_pulse[0];
 
     if (do_psi_pulse):
         pdf = numpy.abs(psi_pulse)**2;
-    
+
         Js = numpy.arange(0,Jmax+1);
         Jssq = Js**2;
-        
+
         Javg = numpy.sum(Js*pdf,axis=1);
         Jsq_avg = numpy.sum(Jssq*pdf,axis=1);
-    
+
         std = numpy.sqrt(Jsq_avg - Javg**2);
         cdf = numpy.cumsum(numpy.abs(psi_pulse)**2,axis=1);
         percentile_999 = numpy.argmax(cdf>=0.999,axis=1);
@@ -134,6 +134,3 @@ if __name__ == "__main__":
 
     if (out_filename == ""):
         print("Saved trace in "+filename);
-
-
-

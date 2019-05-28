@@ -38,9 +38,11 @@ class molecule(object):
         
           s.A_raw = parser.getfloat(s.name,"A");
           s.B_raw = parser.getfloat(s.name,"B");
+          s.D_raw = parser.getfloat(s.name,"D");
 
           s.A = 2*pi*s.A_raw*1e9; # Reexpress as
           s.B = 2*pi*s.B_raw*1e9; # Hz angular frequency
+          s.D = 2*pi*s.D_raw*1e3; #D is in kHz 
                 # E = hbar*B*j*(j+1) -> the time evolution exp(-iE/hbar*dt) 
                 # becomes exp(-iB*j*(j+1)*dt)
           s.alpha_par_volume = parser.getfloat(s.name,"alpha_par_volume");

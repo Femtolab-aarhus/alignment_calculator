@@ -23,7 +23,7 @@ import sys,os
 import config
 import propagation
 import interaction
-import numpy 
+import numpy
 from numpy import pi,exp,sqrt,log,sin,cos
 import boltzmann
 import argparse
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     parser.add_argument('--cos2d',action="store_true",help='Calculate cos^2 theta 2d (requires the U2d helper program to be compiled, see Makefile)');
     parser.add_argument('--csv',action="store_true",help='Store results in a CSV file instead of a .npy file');
     parser.add_argument('-f','--filename',nargs=1,default=[""],type=str,help='Output filename. If using .npz format, .npz extension will be appended to the file name if it is not already there.');
-
+    parser.add_argument('--xc',nargs=1,default=[""],type=str,help='.csv file containing cross-correlation. First column should contain time in ps. Second coulumn should contain signal.')
 
     args = parser.parse_args();
 
@@ -67,6 +67,7 @@ if __name__ == "__main__":
     T = args.temperature[0];
     store_csv = args.csv;
     out_filename = args.filename[0];
+    xc_filename = args.xc[0];
 
     probe_waist = args.probe_waist[0]*1e-6;
     percentile = args.percentile[0];
@@ -80,14 +81,14 @@ if __name__ == "__main__":
 
     states = boltzmann.thermal_JKM_ensemble(T,molecule,Jmax,percentile,anisotropy);
 
-    t,cos2,cos2d,psi = dispatcher.dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_cos2d,do_psi_pulse=False)
+    t,cos2,cos2d,psi = dispatcher.dispatch(states,pulses,Jmax,Nshells,molecule,dt,t_end,probe_waist,calculate_cos2d,xc_filename,do_psi_pulse=False)
 
     attributes = [molecule.name,Jmax,dt,os.path.basename(args.pulses),Nshells,T,probe_waist];
 
     filename = out_filename;
     if (filename == ""):
         filename = "data/"+','.join([str(i) for i in attributes]) + ".npz";
-    
+
     meta = dict();
     meta['molecule'] = molecule;
     meta['Jmax'] = Jmax;
@@ -111,5 +112,3 @@ if __name__ == "__main__":
 
     if (out_filename == ""):
         print("Saved trace in "+filename);
-
-
