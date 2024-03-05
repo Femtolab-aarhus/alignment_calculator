@@ -782,7 +782,7 @@ class calculatron(QThread):
         args += ["--percentile", p["percentile"]];
         args += ["--anisotropy", p["anisotropy"]];
         if os.path.isfile(p["xc_filename"]):
-            args += ["--xc", p["xc_filename"]];
+            args += ["--xc", f'"{p["xc_filename"]}"'];
         if (p["cos2d"]):
             args += ["--cos2d"]
 
@@ -797,7 +797,7 @@ class calculatron(QThread):
         args += [conffile_name,conffile_name, "--Jmax",p["Jmax"],  "-t", p["propTime"]]
         args += ["--Nshells", p["Nshells"], "--probe_waist", p["probeWaist"]]
         if os.path.isfile(p["xc_filename"]):
-            args += ["--xc", p["xc_filename"]];
+            args += ["--xc", f'"{p["xc_filename"]}"'];
         if (p["cos2d"]):
             args += ["--cos2d"]
 
