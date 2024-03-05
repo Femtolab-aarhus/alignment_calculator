@@ -34,7 +34,7 @@ def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,xc_filen
     laserpulses.sort();
     window = 3.0/2
 
-    psi = numpy.zeros(Jmax+1,dtype=numpy.complex);
+    psi = numpy.zeros(Jmax+1,dtype=complex);
     psi[J] = 1;
 
     times = [];
@@ -86,15 +86,15 @@ def cos2_trace(J,K,M,KMsign,Jmax,molecule,laserpulses,dt,t_end,do_cos2d,xc_filen
         if (last_t > t-half_range and not use_xc):
             raise RuntimeError("Pulses are not well enough separated.");
 
-        num_steps = max(2,numpy.ceil((t+start_t-last_t)/dt))
+        num_steps = int(max(2,numpy.ceil((t+start_t-last_t)/dt)))
         times_before = numpy.linspace(last_t,t+start_t,num_steps);
         # Propagate between pulses
         psi_before,cos2_before,cos2d_before = propagation.fieldfree_propagation(psi,last_t,times_before,E_rot,Jmax,K,M,KMsign,D,do_cos2d);
 
 
-        num_steps = max(2,numpy.ceil(2*half_range/dt));
+        num_steps =int(max(2,numpy.ceil(2*half_range/dt)));
         if (do_psi_pulse):
-            num_steps = max(20,num_steps);
+            num_steps = int(max(20,num_steps));
         
         integration_time = numpy.linspace(start_t,end_t,num_steps);
 

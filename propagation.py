@@ -47,7 +47,7 @@ libpropagation = None;
 can_propagate_using_ODE = False;
 try: # to load the C library for propagation.
     libpropagation = ctypes.CDLL("./libpropagation."+utils.library_file_ending());
-    cplx_ndptr = ndpointer(flags=("CONTIGUOUS",),dtype=numpy.complex);
+    cplx_ndptr = ndpointer(flags=("CONTIGUOUS",),dtype=complex);
     real_ndptr = ndpointer(flags=("CONTIGUOUS",),dtype=numpy.double);
     libpropagation.fieldfree_propagation.restype = None;
     libpropagation.fieldfree_propagation.argtypes = (ct.c_int, ct.c_int, ct.c_size_t, cplx_ndptr, ct.c_double, ct.c_size_t, real_ndptr, real_ndptr, real_ndptr, real_ndptr, real_ndptr, cplx_ndptr, real_ndptr, ct.c_bool, real_ndptr, real_ndptr);
@@ -104,7 +104,7 @@ def transfer_JKM(J,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE=True):
               fastest, particularly for short pulses.
      '''
 
-     psi = numpy.zeros(Jmax+1,dtype=numpy.complex);
+     psi = numpy.zeros(Jmax+1,dtype=complex);
      psi[J] = 1;
 
      return transfer_KM(psi,K,M,KMsign,Jmax,peak_intensity,FWHM,t,molecule,use_ODE);
@@ -222,7 +222,7 @@ def propagate(psi_0,time,E_rot,E_0_squared_max,sigma,eig,vec,xc_filename):
      expRot = numpy.exp(-1j*dt*E_rot);
      expRot2 = numpy.exp(-1j*dt*E_rot/2);
 
-     psi_t = numpy.empty((len(time),len(psi_0)), dtype=numpy.complex)
+     psi_t = numpy.empty((len(time),len(psi_0)), dtype=complex)
      psi_t[0,:] = psi_0;
      vecT = numpy.ascontiguousarray(vec.T);
 
@@ -268,7 +268,7 @@ def propagate_ODE(psi_0,time,E_rot,E_0_squared_max,sigma,V0,V1,V2,xc_filename,ab
          raise RuntimeError("Pulse time steps must be equidistant.");
      dt = time[1]-time[0];
 
-     psi_t = numpy.empty((len(time),len(psi_0)), dtype=numpy.complex)
+     psi_t = numpy.empty((len(time),len(psi_0)), dtype=complex)
      psi_t[0,:] = psi_0;
      try:
          res = libpropagation.propagate_field_ODE(len(time),len(psi_0),time[0],dt,E_0_squared_max,sigma,psi_t,V0,V1,V2,E_rot, abstol, reltol);
@@ -290,7 +290,7 @@ def fieldfree_propagation(psi_0,t0,times,E_rot,Jmax,K,M,KMsign,D,do_cos2d=False)
         U2d = numpy.array([]);
 
      if (libpropagation and Jmax>0): # Call a C function instead of using numpy.
-        psi = numpy.zeros((len(times),Jmax+1),dtype=numpy.complex);
+        psi = numpy.zeros((len(times),Jmax+1),dtype=complex);
         cos2 = numpy.zeros((len(times),),dtype=numpy.double);
         if (do_cos2d):
             cos2d = numpy.empty((len(times),),dtype=numpy.double);
