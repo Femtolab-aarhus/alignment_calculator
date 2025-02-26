@@ -2,7 +2,7 @@
 *.dat
 *.csv
 *.o
-*.so
+.so
 *.a
 *.swp
 __pycache__
