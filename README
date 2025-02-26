@@ -1,3 +1,17 @@
+This is the Aarhus femtolab alignment calculator, writted by Anders Søndergaard.
+
+It is written in Python, although it also has some c code complied for fast calculations.
+There are precompiled binaries, which are tested as working in Windows 11 and Ubuntu (on WSL2).
+At the moment, I doubt the mac binaries will work, so you'll be stuck with numpy computations. However,
+since this calculator ws written computers have got a lot faster, and the pure python version is fast
+enoguh to be usable.
+
+The easiest way to install it is using uv (https://docs.astral.sh/uv/):
+    After uv is installed, clone this git repository. Then in a terminal go into the folder
+    and excecute `uv run GUI.py` . uv should automatically download all the dependencies,
+    and then fire up the GUI for the calculator.
+
+
 This alignment calculator has several entry points:
 
 cos2_thermal.py
