@@ -19,13 +19,29 @@
 
 
 import os,sys
-import PyQt5
-import PyQt5.QtCore
-import PyQt5.QtGui
-import PyQt5.QtWidgets
-from PyQt5.QtWidgets import QWidget, QMessageBox, QApplication, QFileDialog
-from PyQt5.QtCore import QThread, QObject
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
+
+from pathlib import Path
+
+# Set the Qt plugin path to ensure the "windows" platform plugin is found
+if getattr(sys, 'frozen', False):
+    # If the application is running as a bundle (frozen)
+    os.environ["QT_PLUGIN_PATH"] = os.path.join(sys._MEIPASS, "PySide6", "plugins")
+else:
+    # For regular Python execution
+    import site
+    # Try to find PySide6 plugins in site-packages
+    for site_path in site.getsitepackages():
+        pyside6_plugin_path = os.path.join(site_path, "PySide6", "plugins")
+        if os.path.exists(pyside6_plugin_path):
+            os.environ["QT_PLUGIN_PATH"] = pyside6_plugin_path
+            break
+
+import PySide6
+import PySide6.QtCore
+import PySide6.QtGui
+import PySide6.QtWidgets
+from PySide6.QtWidgets import QWidget, QMessageBox, QApplication, QFileDialog
+from PySide6.QtCore import QThread, QObject
 import matplotlib
 matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
@@ -47,7 +63,7 @@ import propagation
 #cmd = sys.executable;
 
 
-class GUI(PyQt5.QtWidgets.QMainWindow):
+class GUI(PySide6.QtWidgets.QMainWindow):
     def __init__(self,hardcore,scratchdir):
         super().__init__();
         self.hardcore = hardcore;
@@ -60,7 +76,7 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
 
         self.moleculeConfigFile = "conf/molecules.conf";
 
-        _translate = PyQt5.QtCore.QCoreApplication.translate
+        _translate = PySide6.QtCore.QCoreApplication.translate
         self.ui.moleculesBox.clear();
         self.ui.moleculesBox.addItems(self.list_molecules());
         self.ui.moleculesBox.model().sort(0);
@@ -264,7 +280,7 @@ class GUI(PyQt5.QtWidgets.QMainWindow):
             result = parser.sections();
         except Exception as e:
             self.noMoleculesWarningMsg = str(e);
-            timer = PyQt5.QtCore.QTimer(self);
+            timer = PySide6.QtCore.QTimer(self);
             timer.timeout.connect(self.noMoleculesWarning);
             timer.setSingleShot(True)
             timer.start(0);
@@ -628,7 +644,7 @@ def default(the_default_value,the_input):
     else:
         return the_input;
 
-class aboutWidget(PyQt5.QtWidgets.QDialog):
+class aboutWidget(PySide6.QtWidgets.QDialog):
     def __init__(self,MainWindow):
         super().__init__(MainWindow);
         self.ui = aboutForm();
@@ -636,7 +652,7 @@ class aboutWidget(PyQt5.QtWidgets.QDialog):
         self.ui.Ok.clicked.connect(self.close);
         self.show();
 
-class precalculateWidget(PyQt5.QtWidgets.QDialog):
+class precalculateWidget(PySide6.QtWidgets.QDialog):
     def __init__(self,MainWindow,Jmax,Kmax,Mmax):
         super().__init__(MainWindow);
         self.ui = precalculateForm();
@@ -828,7 +844,7 @@ if __name__ == '__main__':
     with tempfile.TemporaryDirectory() as tmpdirname:
         hardcore = False;
         #hardcore = True
-        application = PyQt5.QtWidgets.QApplication(sys.argv);
+        application = PySide6.QtWidgets.QApplication(sys.argv);
         gui = GUI(hardcore,tmpdirname);
         status = application.exec_();
         # On windows, for some reason, you are not allowed to delete a file

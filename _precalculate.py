@@ -7,7 +7,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 class Ui_precalculate(object):
     def setupUi(self, precalculate):
@@ -23,7 +23,7 @@ class Ui_precalculate(object):
         self.deleteButton.setGeometry(QtCore.QRect(180, 10, 111, 24))
         font = QtGui.QFont()
         font.setBold(True)
-        font.setWeight(75)
+        font.setWeight(QtGui.QFont.Weight.Bold)
         self.deleteButton.setFont(font)
         self.deleteButton.setToolTip("")
         self.deleteButton.setCheckable(False)
